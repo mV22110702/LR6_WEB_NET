@@ -20,14 +20,14 @@ namespace LR6_WEB_NET.Controllers
         }
 
         /// <summary>
-        /// Get array of 5 daily forecasts.
+        /// Get array of daily forecasts.
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="daysCount" >Number of days to forecast (between 1 inclusively and 14 inclusively). Default is 1</param>
         /// <returns></returns>
-        [HttpGet(Name = "GetWeatherForecast")]
-        public IEnumerable<WeatherForecast> Get()
+        [HttpGet("{daysCount:int:range(1,14)}",Name = "GetWeatherForecast")]
+        public IEnumerable<WeatherForecast> Get(int daysCount)
         {
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+            return Enumerable.Range(1, daysCount).Select(index => new WeatherForecast
             {
                 Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
                 TemperatureC = Random.Shared.Next(-20, 55),
