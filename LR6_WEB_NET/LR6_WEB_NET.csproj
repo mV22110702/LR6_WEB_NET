@@ -13,10 +13,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
     <Folder Include="Extensions\" />
-    <Folder Include="Models\Database\" />
-    <Folder Include="Models\Dto\" />
+    <Folder Include="Models\API\" />
     <Folder Include="Services\" />
   </ItemGroup>
 

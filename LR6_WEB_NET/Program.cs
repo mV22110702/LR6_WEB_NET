@@ -10,8 +10,8 @@ builder.Services.AddSwaggerGen(options =>
     options.SwaggerDoc("v1", new OpenApiInfo
     {
         Version = "v1",
-        Title = "Weather API",
-        Description = "An ASP.NET Core Web API for weather data",
+        Title = "Zoo API",
+        Description = "An ASP.NET Core Web API for zoo management.",
         TermsOfService = new Uri("https://example.com/terms"),
         Contact = new OpenApiContact
         {
