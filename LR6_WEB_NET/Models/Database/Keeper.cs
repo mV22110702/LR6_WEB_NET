@@ -1,6 +1,6 @@
-﻿namespace LR6_WEB_NET.Controllers;
+﻿namespace LR6_WEB_NET.Models.Database;
 
-public class ZooKeeper:ICloneable
+public class Keeper:ICloneable
 {
     public int Id { get; set; }
     public string Name { get; set; }
@@ -8,7 +8,7 @@ public class ZooKeeper:ICloneable
     
     public Object Clone()
     {
-        return new ZooKeeper
+        return new Keeper
         {
             Id = this.Id,
             Name = this.Name,

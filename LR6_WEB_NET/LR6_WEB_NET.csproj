@@ -15,7 +15,6 @@
   <ItemGroup>
     <Folder Include="Extensions\" />
     <Folder Include="Models\API\" />
-    <Folder Include="Services\" />
   </ItemGroup>
 
 </Project>

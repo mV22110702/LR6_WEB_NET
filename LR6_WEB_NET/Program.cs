@@ -1,8 +1,12 @@
 using Microsoft.OpenApi.Models;
 using System.Reflection;
+using LR6_WEB_NET.Services.AnimalService;
+using LR6_WEB_NET.Services.KeeperService;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddTransient<IKeeperService, ZooKeeperService>(); //Used transient because it is a stateless service
+builder.Services.AddTransient<IAnimalService, AnimalService>(); //Used transient because it is a stateless service
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
