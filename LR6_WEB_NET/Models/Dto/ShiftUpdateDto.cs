@@ -3,21 +3,16 @@ using LR6_WEB_NET.Models.ValidationAttributes;
 
 namespace LR6_WEB_NET.Models.Dto;
 
-public class ShiftDto
+public class ShiftUpdateDto
 {
-    [Required(ErrorMessage = "{0} is required")]
     [Range(1,int.MaxValue,ErrorMessage = "{0} must be between {1} and {2}")]
-    public int KeeperId { get; set; }
-    [Required(ErrorMessage = "{0} is required")]
+    public int? KeeperId { get; set; }
     [Range(1,int.MaxValue,ErrorMessage = "{0} must be between {1} and {2}")]
-    public int AnimalId { get; set; }
-    [Required(ErrorMessage = "{0} is required")]
+    public int? AnimalId { get; set; }
     [NotLaterThan("EndDate", ErrorMessage = "{0} must be not later than {1}")]
-    public DateTime StartDate { get; set; }
-    [Required(ErrorMessage = "{0} is required")]
+    public DateTime? StartDate { get; set; }
     [NotEarlierThan("StartDate", ErrorMessage = "{0} must be not earlier than {1}")]
-    public DateTime EndDate { get; set; }
-    [Required(ErrorMessage = "{0} is required")]
+    public DateTime? EndDate { get; set; }
     [Range(0, double.MaxValue, ErrorMessage = "{0} must be between {1} and {2}")]
-    public double Salary { get; set; }
+    public double? Salary { get; set; }
 }

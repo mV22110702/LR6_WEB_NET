@@ -1,3 +1,5 @@
+using LR6_WEB_NET.Models.Database;
+using LR6_WEB_NET.Models.Dto;
 using LR6_WEB_NET.Services.KeeperService;
 using Microsoft.AspNetCore.Mvc;
 
@@ -5,12 +7,12 @@ namespace LR6_WEB_NET.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class ZooKeeperController : ControllerBase
+    public class KeeperController : ControllerBase
     {
         private readonly IKeeperService _keeperService;
-        private readonly ILogger<ZooKeeperController> _logger;
+        private readonly ILogger<KeeperController> _logger;
 
-        public ZooKeeperController(ILogger<ZooKeeperController> logger, IKeeperService keeperService)
+        public KeeperController(ILogger<KeeperController> logger, IKeeperService keeperService)
         {
             _logger = logger;
             _keeperService = keeperService;
@@ -61,7 +63,7 @@ namespace LR6_WEB_NET.Controllers
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<Keeper> UpdateOne(int id, KeeperDto keeperDto)
+        public async Task<Keeper> UpdateOne(int id, KeeperUpdateDto keeperDto)
         {
             var keeper = await _keeperService.UpdateOne(id, keeperDto);
             Response.StatusCode = StatusCodes.Status200OK;

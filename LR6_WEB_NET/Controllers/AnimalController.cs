@@ -1,19 +1,18 @@
 using LR6_WEB_NET.Models.Database;
 using LR6_WEB_NET.Models.Dto;
 using LR6_WEB_NET.Services.AnimalService;
-using LR6_WEB_NET.Services.KeeperService;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LR6_WEB_NET.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class ZooAnimalController : ControllerBase
+    public class AnimalController : ControllerBase
     {
         private readonly IAnimalService _animalService;
-        private readonly ILogger<ZooAnimalController> _logger;
+        private readonly ILogger<AnimalController> _logger;
 
-        public ZooAnimalController(ILogger<ZooAnimalController> logger, IAnimalService animalService)
+        public AnimalController(ILogger<AnimalController> logger, IAnimalService animalService)
         {
             _logger = logger;
             _animalService = animalService;
@@ -80,7 +79,7 @@ namespace LR6_WEB_NET.Controllers
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<Animal> DeleteOne(int id)
+        public async Task<Animal?> DeleteOne(int id)
         {
             var deletedAnimal = await _animalService.DeleteOne(id);
             Response.StatusCode = StatusCodes.Status200OK;

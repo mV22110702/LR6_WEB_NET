@@ -5,8 +5,9 @@ namespace LR6_WEB_NET.Services.KeeperService;
 
 public interface IKeeperService
 {
-    public Task<Keeper> FindOne(int id);
+    public Task<Keeper?> FindOne(int id);
+    public Task<bool> DoesExist(int id);
     public Task<Keeper> AddOne(KeeperDto keeperDto);
     public Task<Keeper> UpdateOne(int id, KeeperUpdateDto keeperDto);
-    public Task<Keeper> DeleteOne(int id);
+    public Task<Keeper?> DeleteOne(int id);
 }

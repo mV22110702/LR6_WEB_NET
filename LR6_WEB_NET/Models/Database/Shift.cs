@@ -8,7 +8,7 @@ public class Shift : ICloneable
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
     
-    public decimal Salary { get; set; }
+    public double Salary { get; set; }
 
     public Object Clone()
     {

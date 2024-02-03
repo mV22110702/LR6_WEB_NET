@@ -1,4 +1,6 @@
-﻿using LR6_WEB_NET.Models.Database;
+﻿using System.Net;
+using System.Web.Http;
+using LR6_WEB_NET.Models.Database;
 using LR6_WEB_NET.Models.Dto;
 
 namespace LR6_WEB_NET.Services.KeeperService;
@@ -19,12 +21,20 @@ public class KeeperService : IKeeperService
         new Keeper { Id = 10, Name = "Jack Clinton", Age = 36 },
     };
 
-    public async Task<Keeper> FindOne(int id)
+    public async Task<Keeper?> FindOne(int id)
     {
         await Task.Delay(1000);
         lock (_keepers)
         {
             return _keepers.FirstOrDefault(k => k.Id == id, null);
+        }
+    }
+
+    public Task<bool> DoesExist(int id)
+    {
+        lock (_keepers)
+        {
+            return Task.FromResult(_keepers.Any(k => k.Id == id));
         }
     }
 
@@ -35,7 +45,13 @@ public class KeeperService : IKeeperService
         {
             if (_keepers.Find((keeper) => keeper.Name == keeperDto.Name) != null)
             {
-                throw new BadHttpRequestException("Keeper with this name already exists");
+                throw new HttpResponseException(
+                    new HttpResponseMessage()
+                    {
+                        StatusCode = HttpStatusCode.BadRequest,
+                        Content = new StringContent("Keeper with this name already exists")
+                    }
+                );
             }
 
             var keeper = new Keeper
@@ -57,21 +73,30 @@ public class KeeperService : IKeeperService
             var keeper = _keepers.FirstOrDefault(k => k.Id == id, null);
             if (keeper == null)
             {
-                throw new BadHttpRequestException("Keeper does not exist");
+                throw new HttpResponseException(
+                    new HttpResponseMessage()
+                    {
+                        StatusCode = HttpStatusCode.BadRequest,
+                        Content = new StringContent("Keeper does not exist")
+                    }
+                );
             }
-            if(keeperDto.Name != null)
+
+            if (keeperDto.Name != null)
             {
                 keeper.Name = keeperDto.Name;
             }
-            if(keeperDto.Age != null)
+
+            if (keeperDto.Age != null)
             {
                 keeper.Age = keeperDto.Age.Value;
             }
+
             return keeper;
         }
     }
 
-    public async Task<Keeper> DeleteOne(int id)
+    public async Task<Keeper?> DeleteOne(int id)
     {
         await Task.Delay(1000);
         lock (_keepers)

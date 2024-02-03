@@ -1,13 +1,16 @@
 using Microsoft.OpenApi.Models;
 using System.Reflection;
+using LR6_WEB_NET.Extensions;
 using LR6_WEB_NET.Services.AnimalService;
 using LR6_WEB_NET.Services.KeeperService;
+using LR6_WEB_NET.Services.ShiftService;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddTransient<IKeeperService, ZooKeeperService>(); //Used transient because it is a stateless service
-builder.Services.AddTransient<IAnimalService, AnimalService>(); //Used transient because it is a stateless service
 builder.Services.AddControllers();
+builder.Services.AddTransient<IKeeperService, KeeperService>(); //Used transient because it is a stateless service
+builder.Services.AddTransient<IAnimalService, AnimalService>(); //Used transient because it is a stateless service
+builder.Services.AddTransient<IShiftService, ShiftService>(); //Used transient because it is a stateless service
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -34,6 +37,8 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 var app = builder.Build();
+
+app.UseExceptionHandling();
 
 if (app.Environment.IsDevelopment())
 {

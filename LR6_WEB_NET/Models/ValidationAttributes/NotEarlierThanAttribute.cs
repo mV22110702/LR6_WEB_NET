@@ -14,8 +14,11 @@ public class NotEarlierThanAttribute : CompareDateTimeBaseAttribute
     protected override ValidationResult? IsValid(
         object? value, ValidationContext validationContext)
     {
-        
-        
+        var validationResult = Validate(value, validationContext);
+        if (validationResult != null)
+        {
+            return validationResult;
+        }
         var dateTime = (DateTime)value;
         if (dateTime < EarliestDateTime)
         {

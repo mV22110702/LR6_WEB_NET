@@ -14,7 +14,7 @@ public abstract class CompareDateTimeBaseAttribute : ValidationAttribute
 
     protected abstract string GetErrorMessage(string propertyName);
 
-    protected ValidationResult? ValidateValue(object? value, ValidationContext validationContext)
+    private ValidationResult? ValidateValue(object? value, ValidationContext validationContext)
     {
         if (value == null)
         {
@@ -29,7 +29,7 @@ public abstract class CompareDateTimeBaseAttribute : ValidationAttribute
         return null;
     }
 
-    protected ValidationResult? ValidateOtherProperty(ValidationContext validationContext)
+    private ValidationResult? ValidateOtherProperty(ValidationContext validationContext)
     {
         if (OtherDateTimePropertyName == null)
         {
