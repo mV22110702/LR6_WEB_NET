@@ -1,4 +1,4 @@
-namespace LR6_WEB_NET
+namespace LR6_WEB_NET.Models.API
 {
     public class WeatherForecast
     {

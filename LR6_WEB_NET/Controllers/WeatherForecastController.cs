@@ -1,3 +1,4 @@
+using LR6_WEB_NET.Models.API;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LR6_WEB_NET.Controllers
