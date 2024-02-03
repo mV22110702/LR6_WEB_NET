@@ -19,6 +19,11 @@ namespace LR6_WEB_NET.Controllers
             _logger = logger;
         }
 
+        /// <summary>
+        /// Get array of 5 daily forecasts.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet(Name = "GetWeatherForecast")]
         public IEnumerable<WeatherForecast> Get()
         {
