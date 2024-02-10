@@ -27,16 +27,28 @@ namespace LR6_WEB_NET.Controllers
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<Animal> FindOne(int id)
+        public async Task<ResponseDto<Animal>> FindOne(int id)
         {
             var animal = await _animalService.FindOne(id);
             if (animal == null)
             {
                 Response.StatusCode = StatusCodes.Status404NotFound;
+                return new()
+                {
+                    StatusCode = StatusCodes.Status404NotFound,
+                    Description = "Animal not found",
+                    TotalRecords = 0
+                };
             }
 
             Response.StatusCode = StatusCodes.Status200OK;
-            return animal;
+            return new()
+            {
+                StatusCode = StatusCodes.Status200OK,
+                Values = new() { animal },
+                Description = "Success",
+                TotalRecords = 1
+            };
         }
 
         /// <summary>
@@ -47,11 +59,17 @@ namespace LR6_WEB_NET.Controllers
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<Animal> AddOne(AnimalDto animalDto)
+        public async Task<ResponseDto<Animal>> AddOne(AnimalDto animalDto)
         {
             var animal = await _animalService.AddOne(animalDto);
             Response.StatusCode = StatusCodes.Status201Created;
-            return animal;
+            return new()
+            {
+                StatusCode = StatusCodes.Status200OK,
+                Values = new() { animal },
+                Description = "Success",
+                TotalRecords = 1
+            };
         }
 
         /// <summary>
@@ -63,11 +81,17 @@ namespace LR6_WEB_NET.Controllers
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<Animal> UpdateOne(int id, AnimalUpdateDto animalDto)
+        public async Task<ResponseDto<Animal>> UpdateOne(int id, AnimalUpdateDto animalDto)
         {
             var animal = await _animalService.UpdateOne(id, animalDto);
             Response.StatusCode = StatusCodes.Status200OK;
-            return animal;
+            return new()
+            {
+                StatusCode = StatusCodes.Status200OK,
+                Values = new() { animal },
+                Description = "Success",
+                TotalRecords = 1
+            };
         }
 
         /// <summary>
@@ -79,11 +103,17 @@ namespace LR6_WEB_NET.Controllers
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<Animal?> DeleteOne(int id)
+        public async Task<ResponseDto<Animal?>> DeleteOne(int id)
         {
             var deletedAnimal = await _animalService.DeleteOne(id);
             Response.StatusCode = StatusCodes.Status200OK;
-            return deletedAnimal;
+            return new()
+            {
+                StatusCode = StatusCodes.Status200OK,
+                Values = deletedAnimal == null ? new() : new() { deletedAnimal },
+                Description = "Success",
+                TotalRecords = deletedAnimal == null ? 0 : 1
+            };
         }
     }
 }

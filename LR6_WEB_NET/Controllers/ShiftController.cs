@@ -28,16 +28,28 @@ namespace LR6_WEB_NET.Controllers
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<Shift> FindOne(int id)
+        public async Task<ResponseDto<Shift>> FindOne(int id)
         {
             var shift = await _shiftService.FindOne(id);
             if (shift == null)
             {
                 Response.StatusCode = StatusCodes.Status404NotFound;
+                return new()
+                {
+                    StatusCode = StatusCodes.Status404NotFound,
+                    Description = "Shift not found",
+                    TotalRecords = 0
+                };
             }
 
             Response.StatusCode = StatusCodes.Status200OK;
-            return shift;
+            return new()
+            {
+                StatusCode = StatusCodes.Status200OK,
+                Values = new() { shift },
+                Description = "Success",
+                TotalRecords = 1
+            };
         }
 
         /// <summary>
@@ -48,11 +60,17 @@ namespace LR6_WEB_NET.Controllers
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<Shift> AddOne(ShiftDto shiftDto)
+        public async Task<ResponseDto<Shift>> AddOne(ShiftDto shiftDto)
         {
             var shift = await _shiftService.AddOne(shiftDto);
             Response.StatusCode = StatusCodes.Status201Created;
-            return shift;
+            return new()
+            {
+                StatusCode = StatusCodes.Status200OK,
+                Values = new() { shift },
+                Description = "Success",
+                TotalRecords = 1
+            };
         }
 
         /// <summary>
@@ -64,11 +82,17 @@ namespace LR6_WEB_NET.Controllers
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<Shift> UpdateOne(int id, ShiftUpdateDto shiftDto)
+        public async Task<ResponseDto<Shift>> UpdateOne(int id, ShiftUpdateDto shiftDto)
         {
             var shift = await _shiftService.UpdateOne(id, shiftDto);
             Response.StatusCode = StatusCodes.Status200OK;
-            return shift;
+            return new()
+            {
+                StatusCode = StatusCodes.Status200OK,
+                Values = new() { shift },
+                Description = "Success",
+                TotalRecords = 1
+            };
         }
 
         /// <summary>
@@ -80,11 +104,17 @@ namespace LR6_WEB_NET.Controllers
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<Shift> DeleteOne(int id)
+        public async Task<ResponseDto<Shift>> DeleteOne(int id)
         {
             var deletedShift = await _shiftService.DeleteOne(id);
             Response.StatusCode = StatusCodes.Status200OK;
-            return deletedShift;
+            return new()
+            {
+                StatusCode = StatusCodes.Status200OK,
+                Values = deletedShift == null ? new() : new() { deletedShift },
+                Description = "Success",
+                TotalRecords = deletedShift == null ? 0 : 1
+            };
         }
     }
 }
