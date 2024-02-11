@@ -16,7 +16,7 @@ public class UserRole
     public static List<UserRole> UserRoles = new()
     {
         new UserRole {Id = 1, Name = UserRoleNames[UserRoleName.Admin]},
-        new UserRole {Id = 2, Name = UserRoleNames[UserRoleName.Admin]}
+        new UserRole {Id = 2, Name = UserRoleNames[UserRoleName.User]}
     };
 
     [BindNever] public int Id { get; set; } = 0;

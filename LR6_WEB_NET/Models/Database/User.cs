@@ -3,8 +3,25 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace LR6_WEB_NET.Models.Database;
 
-public class User
+public class User: ICloneable
 {
+    public object Clone()
+    {
+        return new User
+        {
+            Id = Id,
+            Email = Email,
+            PasswordHash = PasswordHash,
+            PasswordSalt = PasswordSalt,
+            InvalidLoginAttempts = InvalidLoginAttempts,
+            IsLocked = IsLocked,
+            LastLogin = LastLogin,
+            Role = Role,
+            FirstName = FirstName,
+            LastName = LastName,
+            BirthDate = BirthDate
+        };
+    }
     [BindNever]
     public int Id { get; set; }
 

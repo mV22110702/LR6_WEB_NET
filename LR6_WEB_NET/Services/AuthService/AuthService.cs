@@ -7,84 +7,69 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Security.Cryptography;
 using System.Web.Http;
+using LR6_WEB_NET.Services.UserService;
 using Microsoft.IdentityModel.Tokens;
 
 namespace LR6_WEB_NET.Services.AuthService;
 
 public class AuthService : IAuthService
 {
-    public List<User> Users { get; set; } = new();
     private readonly IConfiguration _config;
-
-    public AuthService(IConfiguration config)
+    private readonly IUserService _userService;
+    private readonly ILogger<AuthService> _logger;
+    public AuthService(ILogger<AuthService> logger, IConfiguration config, IUserService userService)
     {
+        _logger = logger;
         _config = config;
-
-        User? tempUser = null;
-        for (int i = 0; i < 10; i++)
-        {
-            tempUser = new User
-            {
-                Id = i,
-                Email = $"email{i}@mail.com",
-                Role = new UserRole
-                {
-                    Id = i,
-                    Name = i % 2 == 0 ? "Admin" : "User"
-                },
-                FirstName = $"FirstName{i}",
-                LastName = $"LastName{i}",
-            };
-            SetUserPasswordHash(tempUser, $"password{i}");
-            Users.Add(tempUser);
-        }
+        _userService = userService;
     }
 
     private string CreateToken(User user)
     {
-        List<Claim> claims = new()
+        try
         {
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Email, user.Email),
-            new Claim(ClaimTypes.Role, user.Role.Name)
-        };
+            if (_config.GetValue<string>("Jwt:Key") == null)
+            {
+                throw new HttpResponseException(new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.InternalServerError,
+                    Content = new StringContent("Token cannot be issued due to server error")
+                });
+            }
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config.GetValue<string>("Jwt:Key")));
-        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
-        var token = new JwtSecurityToken(
-            claims: claims,
-            issuer: _config.GetValue<string>("Jwt:Issuer"),
-            audience: _config.GetValue<string>("Jwt:Audience"),
-            expires: DateTime.Now.AddMinutes(_config.GetValue<int>("Jwt:ExpirationInMinutes")),
-            signingCredentials: credentials
-        );
-        return new JwtSecurityTokenHandler().WriteToken(token);
+            List<Claim> claims = new()
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Role, user.Role.Name)
+            };
+            var test = _config.GetValue<string>("Jwt:Key");
+            var key = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(test ?? string.Empty));
+            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+            var token = new JwtSecurityToken(
+                claims: claims,
+                issuer: _config.GetValue<string>("Jwt:Issuer"),
+                audience: _config.GetValue<string>("Jwt:Audience"),
+                expires: DateTime.Now.AddMinutes(_config.GetValue<int>("Jwt:ExpirationInMinutes")),
+                signingCredentials: credentials
+            );
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        } catch (Exception e)
+        {
+            _logger.LogError(e, "Error while creating token");
+            throw new HttpResponseException(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.InternalServerError,
+                Content = new StringContent("Token cannot be issued due to server error")
+            });
+        }
     }
 
-    private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
-    {
-        using var hmac = new HMACSHA512();
-        passwordSalt = hmac.Key;
-        passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
-    }
 
-    private bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
+    public async Task<AuthResponseDto> Login(UserLoginDto userLoginDto)
     {
-        using var hmac = new HMACSHA512(passwordSalt);
-        var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
-        return computedHash.SequenceEqual(passwordHash);
-    }
-
-    private void SetUserPasswordHash(User user, string password)
-    {
-        CreatePasswordHash(password, out var passwordHash, out var passwordSalt);
-        user.PasswordHash = passwordHash;
-        user.PasswordSalt = passwordSalt;
-    }
-
-    public Task<AuthResponseDto> Login(UserLoginDto userLoginDto)
-    {
-        var user = Users.FirstOrDefault(u => u.Email == userLoginDto.Email);
+        var user = await _userService.FindOneByEmail(userLoginDto.Email);
         if (user == null)
         {
             throw new HttpResponseException(new HttpResponseMessage
@@ -95,7 +80,7 @@ public class AuthService : IAuthService
             throw new HttpResponseException(new HttpResponseMessage
                 { StatusCode = HttpStatusCode.BadRequest, Content = new StringContent("User is locked") });
 
-        if (!VerifyPasswordHash(userLoginDto.Password, user.PasswordHash, user.PasswordSalt))
+        if (!_userService.VerifyPasswordHash(userLoginDto.Password, user.PasswordHash, user.PasswordSalt))
         {
             user.InvalidLoginAttempts++;
             if (user.InvalidLoginAttempts >= _config.GetValue<int>("Jwt:MaxInvalidLoginAttempts"))
@@ -105,49 +90,26 @@ public class AuthService : IAuthService
         }
         
         user.LastLogin = DateTime.Now;
-
-        return Task.FromResult(new AuthResponseDto
+        _logger.LogInformation($"User {user.Id} logged in");
+        return new AuthResponseDto
         {
             Token = CreateToken(user)
-        });
+        };
     }
 
-    public Task<AuthResponseDto> Register(UserRegisterDto userRegisterDto)
+    public async Task<AuthResponseDto> Register(UserRegisterDto userRegisterDto)
     {
-        var user = Users.FirstOrDefault(u => u.Email == userRegisterDto.Email);
+        var user =  await _userService.FindOneByEmail(userRegisterDto.Email);
         if (user != null)
         {
             throw new HttpResponseException(new HttpResponseMessage
                 { StatusCode = HttpStatusCode.BadRequest, Content = new StringContent("User already exists") });
         }
 
-        var nextUserId = Users.Max(u => u.Id) + 1;
-        var userRole = UserRole.UserRoles.FirstOrDefault(r => r.Name == userRegisterDto.Role, null);
-        if (userRole == null)
-        {
-            throw new HttpResponseException(new HttpResponseMessage
-                { StatusCode = HttpStatusCode.BadRequest, Content = new StringContent("Role does not exist") });
-        }
-
-        CreatePasswordHash(userRegisterDto.Password, out var passwordHash, out var passwordSalt);
-        user = new User()
-        {
-            Id = nextUserId,
-            Email = userRegisterDto.Email,
-            PasswordHash = passwordHash,
-            PasswordSalt = passwordSalt,
-            InvalidLoginAttempts = 0,
-            IsLocked = false,
-            LastLogin = DateTime.Now,
-            Role = userRole,
-            FirstName = userRegisterDto.FirstName,
-            LastName = userRegisterDto.LastName,
-            BirthDate = userRegisterDto.BirthDate
-        };
-        Users.Add(user);
-        return Task.FromResult(new AuthResponseDto
+        user = await _userService.AddOne(userRegisterDto);
+        return new AuthResponseDto
         {
             Token = CreateToken(user)
-        });
+        };
     }
 }
