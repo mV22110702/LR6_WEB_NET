@@ -1,78 +1,78 @@
 ﻿using System.Net;
+using System.Web.Http;
 using LR6_WEB_NET.Models.Database;
 using LR6_WEB_NET.Models.Dto;
-using System.Web.Http;
 
 namespace LR6_WEB_NET.Services.AnimalService;
 
 public class AnimalService : IAnimalService
 {
-    private static List<Animal> _animals = new List<Animal>
+    private static readonly List<Animal> _animals = new()
     {
-        new Animal
+        new Animal()
         {
             Id = 1,
             Name = "Lion",
             ScientificName = "Panthera leo",
             Age = 5
         },
-        new Animal
+        new Animal()
         {
             Id = 2,
             Name = "Tiger",
             ScientificName = "Panthera tigris",
             Age = 4
         },
-        new Animal
+        new Animal()
         {
             Id = 3,
             Name = "Elephant",
             ScientificName = "Loxodonta",
             Age = 10
         },
-        new Animal
+        new Animal()
         {
             Id = 4,
             Name = "Giraffe",
             ScientificName = "Giraffa camelopardalis",
             Age = 7
         },
-        new Animal
+        new Animal()
         {
             Id = 5,
             Name = "Zebra",
             ScientificName = "Equus zebra",
             Age = 6
         },
-        new Animal
+        new Animal()
         {
             Id = 6,
             Name = "Hippopotamus",
             ScientificName = "Hippopotamus amphibius",
             Age = 8
         },
-        new Animal
+        new Animal()
         {
             Id = 7,
             Name = "Crocodile",
             ScientificName = "Crocodylus",
             Age = 9
         },
-        new Animal
+        new Animal()
         {
             Id = 8,
             Name = "Penguin",
             ScientificName = "Spheniscidae",
             Age = 3
         },
-        new Animal
+        new Animal()
         {
             Id = 9,
             Name = "Kangaroo",
             ScientificName = "Macropodidae",
             Age = 2
         },
-        new Animal
+        new Animal()
         {
             Id = 10,
             Name = "Koala",
@@ -122,25 +122,14 @@ public class AnimalService : IAnimalService
         {
             var animal = _animals.FirstOrDefault(a => a.Id == id, null);
             if (animal == null)
-            {
-                throw new HttpResponseException(new HttpResponseMessage()
+                throw new HttpResponseException(new HttpResponseMessage
                     { StatusCode = HttpStatusCode.BadRequest, Content = new StringContent("Animal does not exist") });
-            }
 
-            if (animalDto.ScientificName != null)
-            {
-                animal.ScientificName = animalDto.ScientificName;
-            }
+            if (animalDto.ScientificName != null) animal.ScientificName = animalDto.ScientificName;
 
-            if (animalDto.Name != null)
-            {
-                animal.Name = animalDto.Name;
-            }
+            if (animalDto.Name != null) animal.Name = animalDto.Name;
 
-            if (animalDto.Age != null)
-            {
-                animal.Age = animalDto.Age.Value;
-            }
+            if (animalDto.Age != null) animal.Age = animalDto.Age.Value;
 
             return animal;
         }
@@ -152,10 +141,7 @@ public class AnimalService : IAnimalService
         lock (_animals)
         {
             var animalToDelete = _animals.FirstOrDefault(a => a.Id == id, null);
-            if (animalToDelete == null)
-            {
-                return null;
-            }
+            if (animalToDelete == null) return null;
 
             var clonedAnimal = (Animal)animalToDelete.Clone();
             _animals.Remove(animalToDelete);

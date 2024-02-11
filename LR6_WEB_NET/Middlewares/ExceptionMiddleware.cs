@@ -1,5 +1,5 @@
-﻿using LR6_WEB_NET.Models.Dto;
-using System.Web.Http;
+﻿using System.Web.Http;
+using LR6_WEB_NET.Models.Dto;
 
 namespace LR6_WEB_NET.Middlewares;
 
@@ -28,17 +28,17 @@ public class ExceptionHandlingMiddleware
     {
         if (rawException is HttpResponseException exception)
         {
-            StreamReader reader = new StreamReader(exception.Response.Content.ReadAsStream());
+            var reader = new StreamReader(exception.Response.Content.ReadAsStream());
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)exception.Response.StatusCode;
-            string responseText = reader.ReadToEnd();
-            ResponseDto<int> responseDto = new ResponseDto<int>() { 
+            var responseText = reader.ReadToEnd();
+            var responseDto = new ResponseDto<int>
+            {
                 Description = responseText,
                 StatusCode = (int)exception.Response.StatusCode,
-                TotalRecords = 0,
+                TotalRecords = 0
             };
             await context.Response.WriteAsJsonAsync(responseDto);
-
         }
     }
 }

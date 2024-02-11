@@ -7,19 +7,19 @@ public class Shift : ICloneable
     public int AnimalId { get; set; }
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
-    
+
     public double Salary { get; set; }
 
-    public Object Clone()
+    public object Clone()
     {
         return new Shift
         {
-            Id = this.Id,
-            KeeperId = this.KeeperId,
-            AnimalId = this.AnimalId,
-            StartDate = this.StartDate,
-            EndDate = this.EndDate,
-            Salary = this.Salary
+            Id = Id,
+            KeeperId = KeeperId,
+            AnimalId = AnimalId,
+            StartDate = StartDate,
+            EndDate = EndDate,
+            Salary = Salary
         };
     }
 }

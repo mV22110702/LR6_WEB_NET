@@ -1,9 +1,9 @@
-using Microsoft.OpenApi.Models;
 using System.Reflection;
 using LR6_WEB_NET.Extensions;
 using LR6_WEB_NET.Services.AnimalService;
 using LR6_WEB_NET.Services.KeeperService;
 using LR6_WEB_NET.Services.ShiftService;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
