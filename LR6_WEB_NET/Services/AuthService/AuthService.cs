@@ -11,16 +11,15 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace LR6_WEB_NET.Services.AuthService;
 
-public class AuthService: IAuthService
+public class AuthService : IAuthService
 {
-    
     public List<User> Users { get; set; } = new();
     private readonly IConfiguration _config;
-    
+
     public AuthService(IConfiguration config)
     {
         _config = config;
-        
+
         User? tempUser = null;
         for (int i = 0; i < 10; i++)
         {
@@ -49,12 +48,14 @@ public class AuthService: IAuthService
             new Claim(ClaimTypes.Email, user.Email),
             new Claim(ClaimTypes.Role, user.Role.Name)
         };
-        
+
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config.GetValue<string>("Jwt:Key")));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
         var token = new JwtSecurityToken(
             claims: claims,
-            expires: DateTime.Now.AddMinutes(30),
+            issuer: _config.GetValue<string>("Jwt:Issuer"),
+            audience: _config.GetValue<string>("Jwt:Audience"),
+            expires: DateTime.Now.AddMinutes(_config.GetValue<int>("Jwt:ExpirationInMinutes")),
             signingCredentials: credentials
         );
         return new JwtSecurityTokenHandler().WriteToken(token);
@@ -80,6 +81,7 @@ public class AuthService: IAuthService
         user.PasswordHash = passwordHash;
         user.PasswordSalt = passwordSalt;
     }
+
     public Task<AuthResponseDto> Login(UserLoginDto userLoginDto)
     {
         var user = Users.FirstOrDefault(u => u.Email == userLoginDto.Email);
@@ -88,15 +90,21 @@ public class AuthService: IAuthService
             throw new HttpResponseException(new HttpResponseMessage
                 { StatusCode = HttpStatusCode.BadRequest, Content = new StringContent("User does not exist") });
         }
+        
+        if(user.IsLocked)
+            throw new HttpResponseException(new HttpResponseMessage
+                { StatusCode = HttpStatusCode.BadRequest, Content = new StringContent("User is locked") });
 
         if (!VerifyPasswordHash(userLoginDto.Password, user.PasswordHash, user.PasswordSalt))
         {
             user.InvalidLoginAttempts++;
-            if(user.InvalidLoginAttempts >= _config.GetValue<int>("Jwt:MaxInvalidLoginAttempts"))
+            if (user.InvalidLoginAttempts >= _config.GetValue<int>("Jwt:MaxInvalidLoginAttempts"))
                 user.IsLocked = true;
             throw new HttpResponseException(new HttpResponseMessage
                 { StatusCode = HttpStatusCode.BadRequest, Content = new StringContent("Passwords do not match") });
         }
+        
+        user.LastLogin = DateTime.Now;
 
         return Task.FromResult(new AuthResponseDto
         {
@@ -104,30 +112,42 @@ public class AuthService: IAuthService
         });
     }
 
-    public Task<AuthResponseDto> Register(User userToCreate)
+    public Task<AuthResponseDto> Register(UserRegisterDto userRegisterDto)
     {
-        var user = Users.FirstOrDefault(u => u.Email == userToCreate.Email);
+        var user = Users.FirstOrDefault(u => u.Email == userRegisterDto.Email);
         if (user != null)
         {
             throw new HttpResponseException(new HttpResponseMessage
-                { StatusCode = HttpStatusCode.BadRequest, Content = new StringContent("User already exists") }); 
+                { StatusCode = HttpStatusCode.BadRequest, Content = new StringContent("User already exists") });
         }
-        
+
         var nextUserId = Users.Max(u => u.Id) + 1;
-        var userRole = UserRole.UserRoles.FirstOrDefault(r => r.Name == userToCreate.Role.Name, null);
+        var userRole = UserRole.UserRoles.FirstOrDefault(r => r.Name == userRegisterDto.Role, null);
         if (userRole == null)
         {
             throw new HttpResponseException(new HttpResponseMessage
                 { StatusCode = HttpStatusCode.BadRequest, Content = new StringContent("Role does not exist") });
         }
-        Users.Add(new User()
+
+        CreatePasswordHash(userRegisterDto.Password, out var passwordHash, out var passwordSalt);
+        user = new User()
         {
             Id = nextUserId,
-            Email = userToCreate.Email,
+            Email = userRegisterDto.Email,
+            PasswordHash = passwordHash,
+            PasswordSalt = passwordSalt,
+            InvalidLoginAttempts = 0,
+            IsLocked = false,
+            LastLogin = DateTime.Now,
             Role = userRole,
-            FirstName = $"FirstName{i}",
-            LastName = $"LastName{i}",
+            FirstName = userRegisterDto.FirstName,
+            LastName = userRegisterDto.LastName,
+            BirthDate = userRegisterDto.BirthDate
+        };
+        Users.Add(user);
+        return Task.FromResult(new AuthResponseDto
+        {
+            Token = CreateToken(user)
         });
-        
     }
 }
