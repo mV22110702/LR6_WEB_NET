@@ -1,6 +1,5 @@
 ﻿using System.Web.Http;
 using LR6_WEB_NET.Models.Dto;
-using LR6_WEB_NET.Services.AuthService;
 
 namespace LR6_WEB_NET.Middlewares;
 

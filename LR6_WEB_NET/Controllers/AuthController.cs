@@ -1,6 +1,5 @@
-using LR6_WEB_NET.Models.Database;
+using Asp.Versioning;
 using LR6_WEB_NET.Models.Dto;
-using LR6_WEB_NET.Services.AnimalService;
 using LR6_WEB_NET.Services.AuthService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -10,6 +9,7 @@ namespace LR6_WEB_NET.Controllers;
 [ApiController]
 [Route("[controller]")]
 [AllowAnonymous]
+[ApiVersionNeutral]
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
@@ -21,7 +21,7 @@ public class AuthController : ControllerBase
         _authService = authService;
     }
 
-    
+
     /// <summary>
     ///     Register user.
     /// </summary>
@@ -41,9 +41,9 @@ public class AuthController : ControllerBase
             Token = result.Token
         };
     }
-    
+
     /// <summary>
-    ///   Login user.
+    ///     Login user.
     /// </summary>
     /// <returns></returns>
     [HttpPost("login")]

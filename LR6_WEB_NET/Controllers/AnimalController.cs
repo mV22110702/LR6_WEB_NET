@@ -1,3 +1,4 @@
+using Asp.Versioning;
 using LR6_WEB_NET.Models.Database;
 using LR6_WEB_NET.Models.Dto;
 using LR6_WEB_NET.Services.AnimalService;
@@ -7,6 +8,7 @@ namespace LR6_WEB_NET.Controllers;
 
 [ApiController]
 [Route("[controller]")]
+[ApiVersionNeutral]
 public class AnimalController : ControllerBase
 {
     private readonly IAnimalService _animalService;

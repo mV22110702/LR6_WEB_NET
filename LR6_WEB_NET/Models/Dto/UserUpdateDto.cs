@@ -1,7 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using LR6_WEB_NET.Models.Database;
 using LR6_WEB_NET.Models.ValidationAttributes;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace LR6_WEB_NET.Models.Dto;
 
@@ -15,8 +13,10 @@ public class UserUpdateDto
 
     [EmailAddress(ErrorMessage = "Invalid email address")]
     public string Email { get; set; } = string.Empty;
-    [OneOf<string>(new[] {"Admin", "User"}, ErrorMessage = "Invalid role")]
+
+    [OneOf<string>("Admin", "User", ErrorMessage = "Invalid role")]
     public string Role { get; set; } = string.Empty;
+
     public DateTime BirthDate { get; set; }
     public string Password { get; set; } = string.Empty;
 }

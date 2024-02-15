@@ -1,7 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using LR6_WEB_NET.Models.Database;
 using LR6_WEB_NET.Models.ValidationAttributes;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace LR6_WEB_NET.Models.Dto;
 
@@ -18,11 +16,14 @@ public class UserRegisterDto
     [Required(ErrorMessage = "{0} is required")]
     [EmailAddress(ErrorMessage = "Invalid email address")]
     public string Email { get; set; } = string.Empty;
+
     [Required(ErrorMessage = "{0} is required")]
-    [OneOf<string>(new[] {"Admin", "User"}, ErrorMessage = "Invalid role")]
+    [OneOf<string>("Admin", "User", ErrorMessage = "Invalid role")]
     public string Role { get; set; } = string.Empty;
+
     [Required(ErrorMessage = "{0} is required")]
     public DateTime BirthDate { get; set; }
+
     [Required(ErrorMessage = "{0} is required")]
     public string Password { get; set; } = string.Empty;
 }

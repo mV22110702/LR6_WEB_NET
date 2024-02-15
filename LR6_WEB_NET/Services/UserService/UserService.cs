@@ -4,7 +4,6 @@ using System.Text;
 using System.Web.Http;
 using LR6_WEB_NET.Models.Database;
 using LR6_WEB_NET.Models.Dto;
-using LR6_WEB_NET.Services.AuthService;
 
 namespace LR6_WEB_NET.Services.UserService;
 
@@ -15,7 +14,7 @@ public class UserService : IUserService
     public UserService()
     {
         User? tempUser = null;
-        for (int i = 0; i < 10; i++)
+        for (var i = 0; i < 10; i++)
         {
             tempUser = new User
             {
@@ -60,14 +59,6 @@ public class UserService : IUserService
         }
     }
 
-
-    private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
-    {
-        using var hmac = new HMACSHA512();
-        passwordSalt = hmac.Key;
-        passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
-    }
-
     public bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
     {
         using var hmac = new HMACSHA512(passwordSalt);
@@ -87,13 +78,11 @@ public class UserService : IUserService
         var nextUserId = _users.Max(u => u.Id) + 1;
         var userRole = UserRole.UserRoles.FirstOrDefault(r => r.Name == userRegisterDto.Role, null);
         if (userRole == null)
-        {
             throw new HttpResponseException(new HttpResponseMessage
                 { StatusCode = HttpStatusCode.BadRequest, Content = new StringContent("Role does not exist") });
-        }
 
         CreatePasswordHash(userRegisterDto.Password, out var passwordHash, out var passwordSalt);
-        var user = new User()
+        var user = new User
         {
             Id = nextUserId,
             Email = userRegisterDto.Email,
@@ -128,10 +117,8 @@ public class UserService : IUserService
             {
                 var userRole = UserRole.UserRoles.FirstOrDefault(r => r.Name == userUpdateDto.Role, null);
                 if (userRole == null)
-                {
                     throw new HttpResponseException(new HttpResponseMessage
                         { StatusCode = HttpStatusCode.BadRequest, Content = new StringContent("Role does not exist") });
-                }
 
                 user.Role = userRole;
             }
@@ -161,5 +148,13 @@ public class UserService : IUserService
             _users.Remove(userToDelete);
             return clonedUser;
         }
+    }
+
+
+    private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
+    {
+        using var hmac = new HMACSHA512();
+        passwordSalt = hmac.Key;
+        passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
     }
 }

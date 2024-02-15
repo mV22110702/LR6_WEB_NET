@@ -9,70 +9,70 @@ public class AnimalService : IAnimalService
 {
     private static readonly List<Animal> _animals = new()
     {
-        new Animal()
+        new Animal
         {
             Id = 1,
             Name = "Lion",
             ScientificName = "Panthera leo",
             Age = 5
         },
-        new Animal()
+        new Animal
         {
             Id = 2,
             Name = "Tiger",
             ScientificName = "Panthera tigris",
             Age = 4
         },
-        new Animal()
+        new Animal
         {
             Id = 3,
             Name = "Elephant",
             ScientificName = "Loxodonta",
             Age = 10
         },
-        new Animal()
+        new Animal
         {
             Id = 4,
             Name = "Giraffe",
             ScientificName = "Giraffa camelopardalis",
             Age = 7
         },
-        new Animal()
+        new Animal
         {
             Id = 5,
             Name = "Zebra",
             ScientificName = "Equus zebra",
             Age = 6
         },
-        new Animal()
+        new Animal
         {
             Id = 6,
             Name = "Hippopotamus",
             ScientificName = "Hippopotamus amphibius",
             Age = 8
         },
-        new Animal()
+        new Animal
         {
             Id = 7,
             Name = "Crocodile",
             ScientificName = "Crocodylus",
             Age = 9
         },
-        new Animal()
+        new Animal
         {
             Id = 8,
             Name = "Penguin",
             ScientificName = "Spheniscidae",
             Age = 3
         },
-        new Animal()
+        new Animal
         {
             Id = 9,
             Name = "Kangaroo",
             ScientificName = "Macropodidae",
             Age = 2
         },
-        new Animal()
+        new Animal
         {
             Id = 10,
             Name = "Koala",
@@ -80,6 +80,15 @@ public class AnimalService : IAnimalService
             Age = 1
         }
     };
+
+    public async Task<List<Animal>> FindAll()
+    {
+        await Task.Delay(1000);
+        lock (_animals)
+        {
+            return _animals.ToList();
+        }
+    }
 
     public async Task<Animal?> FindOne(int id)
     {

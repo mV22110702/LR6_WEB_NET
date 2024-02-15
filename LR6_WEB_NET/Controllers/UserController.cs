@@ -1,3 +1,4 @@
+using Asp.Versioning;
 using LR6_WEB_NET.Models.Database;
 using LR6_WEB_NET.Models.Dto;
 using LR6_WEB_NET.Services.UserService;
@@ -7,12 +8,13 @@ using Microsoft.AspNetCore.Mvc;
 namespace LR6_WEB_NET.Controllers;
 
 [ApiController]
-[Microsoft.AspNetCore.Mvc.Route("[controller]")]
-[Authorize(Policy= "Admin")]
+[Route("user")]
+[Authorize(Policy = "User")]
+[ApiVersionNeutral]
 public class UserController : ControllerBase
 {
-    private readonly IUserService _userService;
     private readonly ILogger<UserController> _logger;
+    private readonly IUserService _userService;
 
     public UserController(ILogger<UserController> logger, IUserService userService)
     {
