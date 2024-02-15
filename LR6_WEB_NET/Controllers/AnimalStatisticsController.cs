@@ -33,6 +33,7 @@ public class AnimalStatisticsController : ControllerBase
     [MapToApiVersion(1.0)]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [AllowAnonymous]
     public async Task<ResponseDto<double>> GetAverageAge()
     {
         var averageAge = await _animalStatisticsService.GetAverageAge();
@@ -56,6 +57,7 @@ public class AnimalStatisticsController : ControllerBase
     [MapToApiVersion(2.0)]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [AllowAnonymous]
     public async Task<ResponseDto<string>> GetAverageAgeV2()
     {
         var averageAgeReadable = await _animalStatisticsService.GetAverageAgeReadable();
@@ -80,20 +82,19 @@ public class AnimalStatisticsController : ControllerBase
     [MapToApiVersion(3.0)]
     [Produces("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task GetAverageAgeV3()
+    [AllowAnonymous]
+    public async Task<FileStreamResult> GetAverageAgeV3()
     {
         var averageAgeExcel = await _animalStatisticsService.GetAverageAgeExcel();
 
         Response.StatusCode = StatusCodes.Status200OK;
         Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
         Response.Headers.ContentDisposition = "attachment;filename=\"AverageAge.xlsx\"";
-        using (var memoryStream = new MemoryStream())
-        {
-            averageAgeExcel.SaveAs(memoryStream);
-            memoryStream.WriteTo(Response.Body);
-            memoryStream.Close();
-        }
+        System.IO.Stream spreadsheetStream = new System.IO.MemoryStream();
+        averageAgeExcel.SaveAs(spreadsheetStream);
+        spreadsheetStream.Position = 0;
 
-        await Response.CompleteAsync();
+        return new FileStreamResult(spreadsheetStream,
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") { FileDownloadName = "AverageAge.xlsx" };
     }
 }

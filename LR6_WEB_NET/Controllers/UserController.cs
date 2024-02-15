@@ -9,7 +9,7 @@ namespace LR6_WEB_NET.Controllers;
 
 [ApiController]
 [Route("user")]
-[Authorize(Policy = "User")]
+[Authorize(Policy = "Admin")]
 [ApiVersionNeutral]
 public class UserController : ControllerBase
 {
