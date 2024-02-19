@@ -11,57 +11,7 @@ public class ShiftService : IShiftService
 {
     private static readonly List<Shift> _shifts = new()
     {
-        new Shift
-        {
-            Id = 1, KeeperId = 1, AnimalId = 1, StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(1),
-            Salary = 100
-        },
-        new Shift
-        {
-            Id = 2, KeeperId = 2, AnimalId = 2, StartDate = DateTime.Now.AddDays(1), EndDate = DateTime.Now.AddDays(2),
-            Salary = 200
-        },
-        new Shift
-        {
-            Id = 3, KeeperId = 3, AnimalId = 3, StartDate = DateTime.Now.AddDays(2), EndDate = DateTime.Now.AddDays(3),
-            Salary = 300
-        },
-        new Shift
-        {
-            Id = 4, KeeperId = 4, AnimalId = 4, StartDate = DateTime.Now.AddDays(3), EndDate = DateTime.Now.AddDays(4),
-            Salary = 400
-        },
-        new Shift
-        {
-            Id = 5, KeeperId = 5, AnimalId = 5, StartDate = DateTime.Now.AddDays(4), EndDate = DateTime.Now.AddDays(5),
-            Salary = 500
-        },
-        new Shift
-        {
-            Id = 6, KeeperId = 6, AnimalId = 6, StartDate = DateTime.Now.AddDays(5), EndDate = DateTime.Now.AddDays(6),
-            Salary = 600
-        },
-        new Shift
-        {
-            Id = 7, KeeperId = 7, AnimalId = 7, StartDate = DateTime.Now.AddDays(6), EndDate = DateTime.Now.AddDays(7),
-            Salary = 700
-        },
-        new Shift
-        {
-            Id = 8, KeeperId = 8, AnimalId = 8, StartDate = DateTime.Now.AddDays(7), EndDate = DateTime.Now.AddDays(8),
-            Salary = 800
-        },
-        new Shift
-        {
-            Id = 9, KeeperId = 9, AnimalId = 9, StartDate = DateTime.Now.AddDays(8), EndDate = DateTime.Now.AddDays(9),
-            Salary = 900
-        },
-        new Shift
-        {
-            Id = 10, KeeperId = 10, AnimalId = 10, StartDate = DateTime.Now.AddDays(9),
-            EndDate = DateTime.Now.AddDays(10),
-            Salary = 1000
-        }
+        
     };
 
     private readonly IAnimalService _animalService;

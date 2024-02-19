@@ -66,7 +66,7 @@ public class UserService : IUserService
         return computedHash.SequenceEqual(passwordHash);
     }
 
-    public void SetUserPasswordHash(User user, string password)
+    public static void SetUserPasswordHash(User user, string password)
     {
         CreatePasswordHash(password, out var passwordHash, out var passwordSalt);
         user.PasswordHash = passwordHash;
@@ -151,7 +151,7 @@ public class UserService : IUserService
     }
 
 
-    private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
+    private static void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
     {
         using var hmac = new HMACSHA512();
         passwordSalt = hmac.Key;

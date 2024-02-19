@@ -1,9 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.EntityFrameworkCore;
 
 namespace LR6_WEB_NET.Models.Database;
 
-public class User : ICloneable
+[Table("Users")]
+[EntityTypeConfiguration(typeof(User))]
+public class User
 {
     [BindNever] public int Id { get; set; }
 
@@ -19,7 +23,9 @@ public class User : ICloneable
     [EmailAddress(ErrorMessage = "Invalid email address")]
     public string Email { get; set; } = string.Empty;
 
-    public UserRole Role { get; set; }
+    [ForeignKey(nameof(Role))]
+    public int RoleId { get; set; } 
+    public UserRole Role { get; set; } = null!;
 
     [Required(ErrorMessage = "{0} is required")]
     public DateTime BirthDate { get; set; }
@@ -32,22 +38,4 @@ public class User : ICloneable
 
     [BindNever] public int InvalidLoginAttempts { get; set; }
     [BindNever] public bool IsLocked { get; set; }
-
-    public object Clone()
-    {
-        return new User
-        {
-            Id = Id,
-            Email = Email,
-            PasswordHash = PasswordHash,
-            PasswordSalt = PasswordSalt,
-            InvalidLoginAttempts = InvalidLoginAttempts,
-            IsLocked = IsLocked,
-            LastLogin = LastLogin,
-            Role = Role,
-            FirstName = FirstName,
-            LastName = LastName,
-            BirthDate = BirthDate
-        };
-    }
 }

@@ -1,25 +1,23 @@
-﻿namespace LR6_WEB_NET.Models.Database;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
-public class Shift : ICloneable
+namespace LR6_WEB_NET.Models.Database;
+
+[Table("Shifts")]
+[PrimaryKey(nameof(KeeperId), nameof(AnimalId))]
+public class Shift
 {
-    public int Id { get; set; }
+    [ForeignKey(nameof(Keeper))]
     public int KeeperId { get; set; }
+    [ForeignKey(nameof(Animal))]
     public int AnimalId { get; set; }
+    [Required]
+    public Keeper Keeper { get; set; }= null!;
+    [Required]
+    public Animal Animal { get; set; }= null!;
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
-
-    public double Salary { get; set; }
-
-    public object Clone()
-    {
-        return new Shift
-        {
-            Id = Id,
-            KeeperId = KeeperId,
-            AnimalId = AnimalId,
-            StartDate = StartDate,
-            EndDate = EndDate,
-            Salary = Salary
-        };
-    }
+    public double Salary { get; set; } 
+    
 }

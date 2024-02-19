@@ -1,6 +1,8 @@
 using System.Reflection;
 using System.Text;
 using Asp.Versioning;
+using LR6_WEB_NET.Controllers;
+using LR6_WEB_NET.Data.DatabaseContext;
 using LR6_WEB_NET.Extensions;
 using LR6_WEB_NET.Models.Database;
 using LR6_WEB_NET.Models.Enums;
@@ -12,13 +14,16 @@ using LR6_WEB_NET.Services.ShiftService;
 using LR6_WEB_NET.Services.UserService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddApiVersioning(options => { options.ReportApiVersions = true;
+builder.Services.AddApiVersioning(options =>
+{
+    options.ReportApiVersions = true;
     options.DefaultApiVersion = new ApiVersion(1.0);
 }).AddMvc().AddApiExplorer(
     options =>
@@ -67,9 +72,9 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 
-    var fileName = typeof( Program ).Assembly.GetName().Name + ".xml";
-    var filePath = Path.Combine( AppContext.BaseDirectory, fileName );
-    options.IncludeXmlComments( filePath );
+    var fileName = typeof(Program).Assembly.GetName().Name + ".xml";
+    var filePath = Path.Combine(AppContext.BaseDirectory, fileName);
+    options.IncludeXmlComments(filePath);
 });
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -96,6 +101,11 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("Admin", policy => policy.RequireRole(UserRole.UserRoleNames[UserRoleName.Admin]));
     options.AddPolicy("User", policy => policy.RequireRole(UserRole.UserRoleNames[UserRoleName.User]));
 });
+builder.Services.AddDbContext<DataContext>(options =>
+{
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+});
 
 var app = builder.Build();
 
@@ -106,11 +116,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI(options =>
     {
-        foreach ( var description in app.DescribeApiVersions() )
+        foreach (var description in app.DescribeApiVersions())
         {
             options.SwaggerEndpoint(
                 $"/swagger/{description.GroupName}/swagger.json",
-                description.GroupName );
+                description.GroupName);
         }
     });
 }
