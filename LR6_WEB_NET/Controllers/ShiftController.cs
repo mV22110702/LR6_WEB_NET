@@ -2,6 +2,7 @@ using Asp.Versioning;
 using LR6_WEB_NET.Models.Database;
 using LR6_WEB_NET.Models.Dto;
 using LR6_WEB_NET.Services.ShiftService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LR6_WEB_NET.Controllers;
@@ -30,6 +31,7 @@ public class ShiftController : ControllerBase
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [Authorize]
     public async Task<ResponseDto<Shift>> FindOne(int animalId, int keeperId)
     {
         var shift = await _shiftService.FindOne(new FindShiftDto() { AnimalId = animalId, KeeperId = keeperId });

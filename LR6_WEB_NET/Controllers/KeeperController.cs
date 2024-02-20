@@ -2,6 +2,7 @@ using Asp.Versioning;
 using LR6_WEB_NET.Models.Database;
 using LR6_WEB_NET.Models.Dto;
 using LR6_WEB_NET.Services.KeeperService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LR6_WEB_NET.Controllers;
@@ -9,6 +10,7 @@ namespace LR6_WEB_NET.Controllers;
 [ApiController]
 [Route("[controller]")]
 [ApiVersionNeutral]
+[Authorize]
 public class KeeperController : ControllerBase
 {
     private readonly IKeeperService _keeperService;

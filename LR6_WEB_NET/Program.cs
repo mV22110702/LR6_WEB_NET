@@ -1,5 +1,6 @@
 using System.Text;
 using Asp.Versioning;
+using HealthChecks.UI.Client;
 using LR6_WEB_NET.Data.DatabaseContext;
 using LR6_WEB_NET.Extensions;
 using LR6_WEB_NET.Models.Database;
@@ -114,9 +115,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 builder.Services.AddAuthorization(options =>
 {
-    options.FallbackPolicy = new AuthorizationPolicyBuilder()
-        .RequireAuthenticatedUser()
-        .Build();
     options.AddPolicy("Admin", policy => policy.RequireRole(UserRole.UserRoleNames[UserRoleName.Admin]));
     options.AddPolicy("User", policy => policy.RequireRole(UserRole.UserRoleNames[UserRoleName.User]));
 });
@@ -125,7 +123,6 @@ builder.Services.AddDbContext<DataContext>(options =>
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
 });
-builder.Services.AddSingleton<DBHealthCheckService>();
 builder.Services.AddHealthChecks()
     .AddCheck<DBHealthCheckService>(
         "DB check",
@@ -156,9 +153,21 @@ builder.Services.AddHealthChecks()
         failureStatus: HealthStatus.Unhealthy,
         tags: new[] { "user-role" }
     );
+builder.Services.AddHealthChecksUI().AddInMemoryStorage();
 
 var app = builder.Build();
 
+app.MapHealthChecksUI();
+app.MapHealthChecks("/health-ui", new HealthCheckOptions
+{
+    ResultStatusCodes =
+    {
+        [HealthStatus.Healthy] = StatusCodes.Status200OK,
+        [HealthStatus.Degraded] = StatusCodes.Status200OK,
+        [HealthStatus.Unhealthy] = StatusCodes.Status503ServiceUnavailable
+    },
+    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+});
 app.MapHealthChecks("/health/db", new HealthCheckOptions
 {
     Predicate = check => check.Tags.Contains("db"),

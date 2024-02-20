@@ -31,10 +31,17 @@ namespace LR6_WEB_NET.Services.DBSeedingHealthCheckService
                 healthCheckResults.Add(entryKey, entryValue);
             }
 
+            var healthStatusToStatusCodes = new Dictionary<HealthStatus, int>
+            {
+                [HealthStatus.Healthy] = StatusCodes.Status200OK,
+                [HealthStatus.Degraded] = StatusCodes.Status200OK,
+                [HealthStatus.Unhealthy] = StatusCodes.Status503ServiceUnavailable
+            };
+
             var response = new HealthCheckResponseDto()
             {
                 Description = "Health check results",
-                StatusCode = (int)healthReport.Status,
+                StatusCode = healthStatusToStatusCodes[healthReport.Status],
                 Results = healthCheckResults
             };
             
