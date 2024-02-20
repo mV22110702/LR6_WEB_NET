@@ -4,6 +4,7 @@ using LR6_WEB_NET.Data.DatabaseContext;
 using LR6_WEB_NET.Models.Database;
 using LR6_WEB_NET.Models.Dto;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace LR6_WEB_NET.Services.KeeperService;
 
@@ -49,7 +50,7 @@ public class KeeperService : IKeeperService
                     Content = new StringContent("Keeper does not exist")
                 }
             );
-        if (keeperDto.Name != null) keeper.Name = keeperDto.Name;
+        if (!String.IsNullOrEmpty(keeperDto.Name)) keeper.Name = keeperDto.Name;
 
         if (keeperDto.Age != null) keeper.Age = keeperDto.Age.Value;
 

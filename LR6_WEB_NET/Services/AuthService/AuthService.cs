@@ -44,7 +44,8 @@ public class AuthService : IAuthService
                 { StatusCode = HttpStatusCode.BadRequest, Content = new StringContent("Passwords do not match") });
         }
 
-        user.LastLogin = DateTime.Now;
+        await this._userService.UpdateOne(user.Id,new UserUpdateDto(){LastLogin = DateTime.Now});
+        
         _logger.LogInformation($"User {user.Id} logged in");
         return new AuthResponseDto
         {

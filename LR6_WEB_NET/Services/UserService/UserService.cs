@@ -23,30 +23,22 @@ public class UserService : IUserService
 
     public async Task<User?> FindOne(int id)
     {
-        // await Task.Delay(1000);
-        // lock (_users)
-        // {
-        //     return _users.FirstOrDefault(a => a.Id == id, null);
-        // }
-        return await _dataContext.Users.FindAsync(id);
+        return await _dataContext.Users
+            .Include(u => u.Role)
+            .Where(u => u.Id == id)
+            .FirstOrDefaultAsync();
     }
 
     public async Task<User?> FindOneByEmail(string email)
     {
-        // await Task.Delay(1000);
-        // lock (_users)
-        // {
-        //     return _users.FirstOrDefault(a => a.Email == email, null);
-        // }
-        return await _dataContext.Users.FirstOrDefaultAsync(u => u.Email == email);
+        return await _dataContext.Users
+            .Include(u => u.Role)
+            .Where(u => u.Email == email)
+            .FirstOrDefaultAsync();
     }
 
     public Task<bool> DoesExist(int id)
     {
-        // lock (_users)
-        // {
-        //     return Task.FromResult(_users.Any(a => a.Id == id));
-        // }
         return _dataContext.Users.AnyAsync(u => u.Id == id);
     }
 
@@ -71,7 +63,7 @@ public class UserService : IUserService
             throw new HttpResponseException(new HttpResponseMessage
                 { StatusCode = HttpStatusCode.BadRequest, Content = new StringContent("Role does not exist") });
         CreatePasswordHash(userRegisterDto.Password, out var passwordHash, out var passwordSalt);
-        
+
         var user = new User
         {
             Email = userRegisterDto.Email,
@@ -96,28 +88,28 @@ public class UserService : IUserService
         if (user == null)
             throw new HttpResponseException(new HttpResponseMessage
                 { StatusCode = HttpStatusCode.BadRequest, Content = new StringContent("User does not exist") });
-        
-        if (userUpdateDto.FirstName != null) user.FirstName = userUpdateDto.FirstName;
-        if (userUpdateDto.LastName != null) user.LastName = userUpdateDto.LastName;
-        if (userUpdateDto.Email != null) user.Email = userUpdateDto.Email;
-        if (userUpdateDto.Role != null)
+
+        if (!String.IsNullOrEmpty(userUpdateDto.FirstName)) user.FirstName = userUpdateDto.FirstName;
+        if (!String.IsNullOrEmpty(userUpdateDto.LastName)) user.LastName = userUpdateDto.LastName;
+        if (!String.IsNullOrEmpty(userUpdateDto.Email)) user.Email = userUpdateDto.Email;
+        if (!String.IsNullOrEmpty(userUpdateDto.Role))
         {
             var userRole = await _userRoleService.FindByName(userUpdateDto.Role);
             if (userRole == null)
                 throw new HttpResponseException(new HttpResponseMessage
                     { StatusCode = HttpStatusCode.BadRequest, Content = new StringContent("Role does not exist") });
-        
+
             user.Role = userRole;
         }
-        
+
         if (userUpdateDto.BirthDate != null) user.BirthDate = (DateTime)userUpdateDto.BirthDate;
-        if (userUpdateDto.Password != null)
+        if (!String.IsNullOrEmpty(userUpdateDto.Password))
         {
             CreatePasswordHash(userUpdateDto.Password, out var passwordHash, out var passwordSalt);
             user.PasswordHash = passwordHash;
             user.PasswordSalt = passwordSalt;
         }
-        
+
         await _dataContext.SaveChangesAsync();
         return user;
     }

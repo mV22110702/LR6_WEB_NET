@@ -19,4 +19,6 @@ public class UserUpdateDto
 
     public DateTime? BirthDate { get; set; }
     public string? Password { get; set; } = string.Empty;
+    
+    public DateTime LastLogin { get; set; }
 }

@@ -49,9 +49,10 @@ public class AnimalService : IAnimalService
         if (animal == null)
             throw new HttpResponseException(new HttpResponseMessage
                 { StatusCode = HttpStatusCode.BadRequest, Content = new StringContent("Animal does not exist") });
-        if (animalDto.ScientificName != null) animal.ScientificName = animalDto.ScientificName;
         
-        if (animalDto.Name != null) animal.Name = animalDto.Name;
+        if (!String.IsNullOrEmpty(animalDto.ScientificName)) animal.ScientificName = animalDto.ScientificName;
+        
+        if (!String.IsNullOrEmpty(animalDto.Name)) animal.Name = animalDto.Name;
         
         if (animalDto.Age != null) animal.Age = animalDto.Age.Value;
         
