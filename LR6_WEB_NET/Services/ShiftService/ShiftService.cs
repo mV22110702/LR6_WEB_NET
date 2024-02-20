@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Web.Http;
+using LR6_WEB_NET.Data.DatabaseContext;
 using LR6_WEB_NET.Models.Database;
 using LR6_WEB_NET.Models.Dto;
 using LR6_WEB_NET.Services.AnimalService;
@@ -9,33 +10,26 @@ namespace LR6_WEB_NET.Services.ShiftService;
 
 public class ShiftService : IShiftService
 {
-    private static readonly List<Shift> _shifts = new()
-    {
-        
-    };
+    private readonly DataContext _dataContext;
 
     private readonly IAnimalService _animalService;
 
     private readonly IKeeperService _keeperService;
 
-    public ShiftService(IKeeperService keeperService, IAnimalService animalService)
+    public ShiftService(IKeeperService keeperService, IAnimalService animalService, DataContext dataContext)
     {
         _keeperService = keeperService;
         _animalService = animalService;
+        _dataContext = dataContext;
     }
 
-    public async Task<Shift?> FindOne(int id)
+    public async Task<Shift?> FindOne(FindShiftDto id)
     {
-        await Task.Delay(1000);
-        lock (_shifts)
-        {
-            return _shifts.FirstOrDefault(k => k.Id == id, null);
-        }
+        return _dataContext.Shifts.FirstOrDefault(s => s.AnimalId == id.AnimalId && s.KeeperId == id.KeeperId);
     }
 
     public async Task<Shift> AddOne(ShiftDto shiftDto)
     {
-        await Task.Delay(1000);
         var doesKeeperExist = await _keeperService.DoesExist(shiftDto.KeeperId);
         if (!doesKeeperExist)
             throw new HttpResponseException(
@@ -56,115 +50,72 @@ public class ShiftService : IShiftService
                 }
             );
 
-        lock (_shifts)
+        if (
+            (from shift in _dataContext.Shifts
+                where shift.KeeperId == shiftDto.KeeperId && shiftDto.StartDate <= shift.EndDate
+                select shift).Any()
+        )
+            throw new HttpResponseException(
+                new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.BadRequest,
+                    Content = new StringContent("Shift with this keeper overlaps with another shift")
+                }
+            );
+        var newShift = new Shift
         {
-            if (
-                _shifts.Find(
-                    shift => shift.KeeperId == shiftDto.KeeperId && shiftDto.StartDate <= shift.EndDate
-                ) != null
-            )
-                throw new HttpResponseException(
-                    new HttpResponseMessage
-                    {
-                        StatusCode = HttpStatusCode.BadRequest,
-                        Content = new StringContent("Shift with this keeper overlaps with another shift")
-                    }
-                );
+            KeeperId = shiftDto.KeeperId,
+            AnimalId = shiftDto.AnimalId,
+            StartDate = shiftDto.StartDate,
+            EndDate = shiftDto.EndDate,
+            Salary = shiftDto.Salary
+        };
 
-            var shift = new Shift
-            {
-                Id = _shifts.Max(k => k.Id) + 1,
-                KeeperId = shiftDto.KeeperId,
-                AnimalId = shiftDto.AnimalId,
-                StartDate = shiftDto.StartDate,
-                EndDate = shiftDto.EndDate,
-                Salary = shiftDto.Salary
-            };
-            _shifts.Add(shift);
-            return shift;
-        }
+        _dataContext.Shifts.Add(newShift);
+        await _dataContext.SaveChangesAsync();
+        return newShift;
     }
 
-    public async Task<Shift> UpdateOne(int id, ShiftUpdateDto shiftDto)
+    public async Task<Shift> UpdateOne(FindShiftDto id, ShiftUpdateDto shiftDto)
     {
-        await Task.Delay(1000);
-        if (shiftDto.KeeperId != null)
-        {
-            var doesKeeperExist = await _keeperService.DoesExist(shiftDto.KeeperId.Value);
-            if (!doesKeeperExist)
-                throw new HttpResponseException(
-                    new HttpResponseMessage
-                    {
-                        StatusCode = HttpStatusCode.BadRequest,
-                        Content = new StringContent("Keeper not found")
-                    }
-                );
-        }
+        var candidate = await this.FindOne(id);
+        if (candidate == null)
+            throw new HttpResponseException(
+                new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.BadRequest,
+                    Content = new StringContent("Shift not found")
+                }
+            );
+        if (
+            (from shift in _dataContext.Shifts
+                where shift.KeeperId == id.KeeperId && shiftDto.StartDate <= shift.EndDate
+                select shift).Any()
+        )
+            throw new HttpResponseException(
+                new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.BadRequest,
+                    Content = new StringContent("Shift with this keeper overlaps with another shift")
+                }
+            );
 
-        if (shiftDto.AnimalId != null)
-        {
-            var doesAnimalExist = await _animalService.DoesExist(shiftDto.AnimalId.Value);
-            if (!doesAnimalExist)
-                throw new HttpResponseException(
-                    new HttpResponseMessage
-                    {
-                        StatusCode = HttpStatusCode.BadRequest,
-                        Content = new StringContent("Animal not found")
-                    }
-                );
-        }
+        if (shiftDto.StartDate != null) candidate.StartDate = shiftDto.StartDate.Value;
 
-        lock (_shifts)
-        {
-            var shift = _shifts.FirstOrDefault(k => k.Id == id, null);
-            if (shift == null)
-                throw new HttpResponseException(
-                    new HttpResponseMessage
-                    {
-                        StatusCode = HttpStatusCode.BadRequest,
-                        Content = new StringContent("Shift not found")
-                    }
-                );
+        if (shiftDto.EndDate != null) candidate.EndDate = shiftDto.EndDate.Value;
 
-            if (
-                _shifts.Find(
-                    shift => shift.Id != id && shift.KeeperId == shiftDto.KeeperId &&
-                             shiftDto.StartDate <= shift.EndDate
-                ) != null
-            )
-                throw new HttpResponseException(
-                    new HttpResponseMessage
-                    {
-                        StatusCode = HttpStatusCode.BadRequest,
-                        Content = new StringContent("Shift with this keeper overlaps with another shift")
-                    }
-                );
+        if (shiftDto.Salary != null) candidate.Salary = shiftDto.Salary.Value;
 
-            if (shiftDto.KeeperId != null) shift.KeeperId = shiftDto.KeeperId.Value;
-
-            if (shiftDto.AnimalId != null) shift.AnimalId = shiftDto.AnimalId.Value;
-
-            if (shiftDto.StartDate != null) shift.StartDate = shiftDto.StartDate.Value;
-
-            if (shiftDto.EndDate != null) shift.EndDate = shiftDto.EndDate.Value;
-
-            if (shiftDto.Salary != null) shift.Salary = shiftDto.Salary.Value;
-
-            return shift;
-        }
+        await _dataContext.SaveChangesAsync();
+        return candidate;
     }
 
-    public async Task<Shift?> DeleteOne(int id)
+    public async Task<Shift?> DeleteOne(FindShiftDto id)
     {
-        await Task.Delay(1000);
-        lock (_shifts)
-        {
-            var shiftToDelete = _shifts.FirstOrDefault(k => k.Id == id, null);
-            if (shiftToDelete == null) return null;
-
-            var clonedKeeper = (Shift)shiftToDelete.Clone();
-            _shifts.Remove(shiftToDelete);
-            return clonedKeeper;
-        }
+        var shiftToDelete = await this.FindOne(id);
+        if (shiftToDelete == null) return null;
+        _dataContext.Shifts.Remove(shiftToDelete);
+        await _dataContext.SaveChangesAsync();
+        return shiftToDelete;
     }
 }

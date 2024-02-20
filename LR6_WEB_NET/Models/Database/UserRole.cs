@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LR6_WEB_NET.Models.Database;
 
-[Table("UserRoles")]
+[Table("user_roles")]
 [EntityTypeConfiguration(typeof(UserRoleConfiguration))]
 public class UserRole
 {

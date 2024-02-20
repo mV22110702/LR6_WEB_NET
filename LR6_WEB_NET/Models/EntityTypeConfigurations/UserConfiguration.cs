@@ -10,7 +10,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
     public void Configure(EntityTypeBuilder<User> builder)
     {
         User? tempUser = null;
-        for (var i = 0; i < 10; i++)
+        for (var i = 1; i <= 10; i++)
         {
             tempUser = new User
             {

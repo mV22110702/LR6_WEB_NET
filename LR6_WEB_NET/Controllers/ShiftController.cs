@@ -21,17 +21,18 @@ public class ShiftController : ControllerBase
     }
 
     /// <summary>
-    ///     Get shift by id.
+    ///     Get shift by animal id and keeper id.
     /// </summary>
-    /// <param name="id">Shift id</param>
+    /// <param name="animalId">Animal id</param>
+    /// <param name="keeperId">Keeper id</param>
     /// <returns></returns>
-    [HttpGet("{id:int:min(0)}")]
+    [HttpGet("animal/{animalId:int:min(0)}/keeper/{keeperId:int:min(0)}")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ResponseDto<Shift>> FindOne(int id)
+    public async Task<ResponseDto<Shift>> FindOne(int animalId, int keeperId)
     {
-        var shift = await _shiftService.FindOne(id);
+        var shift = await _shiftService.FindOne(new FindShiftDto() { AnimalId = animalId, KeeperId = keeperId });
         if (shift == null)
         {
             Response.StatusCode = StatusCodes.Status404NotFound;
@@ -56,8 +57,10 @@ public class ShiftController : ControllerBase
     /// <summary>
     ///     Add shift.
     /// </summary>
+    /// <param name="animalId">Animal id</param>
+    /// <param name="keeperId">Keeper id</param>
     /// <returns></returns>
-    [HttpPost]
+    [HttpPost("animal/{animalId:int:min(0)}/keeper/{keeperId:int:min(0)}")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -77,15 +80,16 @@ public class ShiftController : ControllerBase
     /// <summary>
     ///     Update shift.
     /// </summary>
-    /// <param name="id">Shift id</param>
+    /// <param name="animalId">Animal id</param>
+    /// <param name="keeperId">Keeper id</param>
     /// <returns></returns>
-    [HttpPut("{id:int:min(0)}")]
+    [HttpPut("animal/{animalId:int:min(0)}/keeper/{keeperId:int:min(0)}")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ResponseDto<Shift>> UpdateOne(int id, ShiftUpdateDto shiftDto)
+    public async Task<ResponseDto<Shift>> UpdateOne(int animalId,int keeperId, ShiftUpdateDto shiftDto)
     {
-        var shift = await _shiftService.UpdateOne(id, shiftDto);
+        var shift = await _shiftService.UpdateOne(new FindShiftDto() { AnimalId = animalId, KeeperId = keeperId }, shiftDto);
         Response.StatusCode = StatusCodes.Status200OK;
         return new ResponseDto<Shift>
         {
@@ -99,15 +103,16 @@ public class ShiftController : ControllerBase
     /// <summary>
     ///     Delete shift.
     /// </summary>
-    /// <param name="id">Shift id</param>
+    /// <param name="animalId">Animal id</param>
+    /// <param name="keeperId">Keeper id</param>
     /// <returns></returns>
-    [HttpDelete("{id:int:min(0)}")]
+    [HttpDelete("animal/{animalId:int:min(0)}/keeper/{keeperId:int:min(0)}")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ResponseDto<Shift>> DeleteOne(int id)
+    public async Task<ResponseDto<Shift>> DeleteOne(int animalId,int keeperId)
     {
-        var deletedShift = await _shiftService.DeleteOne(id);
+        var deletedShift = await _shiftService.DeleteOne(new FindShiftDto() { AnimalId = animalId, KeeperId = keeperId });
         Response.StatusCode = StatusCodes.Status200OK;
         return new ResponseDto<Shift>
         {

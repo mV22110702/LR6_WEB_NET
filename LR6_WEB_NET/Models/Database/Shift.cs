@@ -1,11 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using LR6_WEB_NET.Models.EntityTypeConfigurations;
 using Microsoft.EntityFrameworkCore;
 
 namespace LR6_WEB_NET.Models.Database;
 
 [Table("Shifts")]
 [PrimaryKey(nameof(KeeperId), nameof(AnimalId))]
+[EntityTypeConfiguration(typeof(ShiftConfiguration))]
 public class Shift
 {
     [ForeignKey(nameof(Keeper))]

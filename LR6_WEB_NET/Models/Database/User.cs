@@ -1,12 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using LR6_WEB_NET.Models.EntityTypeConfigurations;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 
 namespace LR6_WEB_NET.Models.Database;
 
 [Table("Users")]
-[EntityTypeConfiguration(typeof(User))]
+[EntityTypeConfiguration(typeof(UserConfiguration))]
 public class User
 {
     [BindNever] public int Id { get; set; }

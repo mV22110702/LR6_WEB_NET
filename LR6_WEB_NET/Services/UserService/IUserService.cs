@@ -11,6 +11,5 @@ public interface IUserService
     public Task<User> AddOne(UserRegisterDto userRegisterDto);
     public Task<User> UpdateOne(int id, UserUpdateDto userUpdateDtoDto);
     public Task<User?> DeleteOne(int id);
-    public void SetUserPasswordHash(User user, string password);
     public bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt);
 }

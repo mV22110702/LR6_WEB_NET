@@ -13,13 +13,12 @@ public class DataContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        base.OnModelCreating(modelBuilder);
-        modelBuilder.HasDefaultSchema("zoo");
+        base.OnModelCreating(modelBuilder); 
     }
 
     public DbSet<Animal> Animals { get; set; }
     public DbSet<Keeper> Keepers { get; set; }
     public DbSet<Shift> Shifts { get; set; }
-    public DbSet<Users> Users { get; set; }
+    public DbSet<User> Users { get; set; }
     public DbSet<UserRole> UserRoles { get; set; }
 }

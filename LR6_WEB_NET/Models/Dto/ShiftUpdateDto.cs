@@ -5,11 +5,6 @@ namespace LR6_WEB_NET.Models.Dto;
 
 public class ShiftUpdateDto
 {
-    [Range(1, int.MaxValue, ErrorMessage = "{0} must be between {1} and {2}")]
-    public int? KeeperId { get; set; }
-
-    [Range(1, int.MaxValue, ErrorMessage = "{0} must be between {1} and {2}")]
-    public int? AnimalId { get; set; }
 
     [NotLaterThan("EndDate", ErrorMessage = "{0} must be not later than {1}")]
     public DateTime? StartDate { get; set; }
