@@ -1,10 +1,12 @@
 ﻿using LR6_WEB_NET.Models.Database;
 using LR6_WEB_NET.Models.Dto;
+using LR6_WEB_NET.Services.Service;
 
 namespace LR6_WEB_NET.Services.AnimalService;
 
-public interface IAnimalService
+public interface IAnimalService : IService
 {
+    
     public Task<Animal?> FindOne(int id);
 
     public Task<List<Animal>> FindAll();

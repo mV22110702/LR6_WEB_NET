@@ -68,4 +68,16 @@ public class AnimalService : IAnimalService
         await _dataContext.SaveChangesAsync();
         return animalToDelete;
     }
+
+    public async Task<string?> CheckServiceConnection()
+    {
+        try
+        {
+            var animal = await _dataContext.Animals.FirstOrDefaultAsync();
+            return null;
+        } catch (Exception e)
+        {
+            return e.Message;
+        }
+    }
 }

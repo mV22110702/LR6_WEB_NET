@@ -7,17 +7,21 @@ using LR6_WEB_NET.Models.Enums;
 using LR6_WEB_NET.Services.AnimalService;
 using LR6_WEB_NET.Services.AnimalStatisticsService;
 using LR6_WEB_NET.Services.AuthService;
+using LR6_WEB_NET.Services.DBSeedingHealthCheckService;
 using LR6_WEB_NET.Services.KeeperService;
 using LR6_WEB_NET.Services.ShiftService;
 using LR6_WEB_NET.Services.UserRoleService;
 using LR6_WEB_NET.Services.UserService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddApiVersioning(options =>
@@ -30,19 +34,33 @@ builder.Services.AddApiVersioning(options =>
         options.GroupNameFormat = "'v'VVV";
         options.SubstituteApiVersionInUrl = true;
     });
-builder.Services.AddScoped<IAnimalService, AnimalService>(); //Used scoped because a new connection context must be created on each request 
+builder.Services
+    .AddScoped<IAnimalService,
+        AnimalService>(); //Used scoped because a new connection context must be created on each request 
 builder.Services
     .AddScoped<IAnimalStatisticsService,
         AnimalStatisticsService>(); //Used scoped because a new connection context must be created on each request 
-builder.Services.AddScoped<IAuthService, AuthService>(); //Used scoped because a new connection context must be created on each request 
-builder.Services.AddScoped<IKeeperService, KeeperService>(); //Used scoped because a new connection context must be created on each request 
-builder.Services.AddScoped<IShiftService, ShiftService>(); //Used scoped because a new connection context must be created on each request 
-builder.Services.AddScoped<IUserRoleService, UserRoleService>(); //Used scoped because a new connection context must be created on each request 
+builder.Services
+    .AddScoped<IAuthService,
+        AuthService>(); //Used scoped because a new connection context must be created on each request 
+builder.Services
+    .AddScoped<IKeeperService,
+        KeeperService>(); //Used scoped because a new connection context must be created on each request 
+builder.Services
+    .AddScoped<IShiftService,
+        ShiftService>(); //Used scoped because a new connection context must be created on each request 
+builder.Services
+    .AddScoped<IUserRoleService,
+        UserRoleService>(); //Used scoped because a new connection context must be created on each request 
 
-builder.Services.AddScoped<IUserService, UserService>(); //Used scoped because a new connection context must be created on each request 
+builder.Services
+    .AddScoped<IUserService,
+        UserService>(); //Used scoped because a new connection context must be created on each request 
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSingleton<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();//Used singleton because it is one-time configuration
+builder.Services
+    .AddSingleton<IConfigureOptions<SwaggerGenOptions>,
+        ConfigureSwaggerOptions>(); //Used singleton because it is one-time configuration
 builder.Services.AddSwaggerGen(options =>
 {
     options.OperationFilter<SwaggerDefaultValues>();
@@ -107,11 +125,107 @@ builder.Services.AddDbContext<DataContext>(options =>
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
 });
-builder.Services.AddHealthChecks();
+builder.Services.AddSingleton<DBHealthCheckService>();
+builder.Services.AddHealthChecks()
+    .AddCheck<DBHealthCheckService>(
+        "DB check",
+        failureStatus: HealthStatus.Unhealthy,
+        tags: new[] { "db" }
+    )
+    .AddCheck<UserHealthCheckService>(
+        "User service check",
+        failureStatus: HealthStatus.Unhealthy,
+        tags: new[] { "user" }
+    )
+    .AddCheck<AnimalHealthCheckService>(
+        "Animal service check",
+        failureStatus: HealthStatus.Unhealthy,
+        tags: new[] { "animal" }
+    )
+    .AddCheck<KeeperHealthCheckService>(
+        "Keeper service check",
+        failureStatus: HealthStatus.Unhealthy,
+        tags: new[] { "keeper" }
+    )
+    .AddCheck<ShiftHealthCheckService>(
+        "Shift service check",
+        failureStatus: HealthStatus.Unhealthy,
+        tags: new[] { "shift" }
+    ).AddCheck<UserRoleHealthCheckService>(
+        "User role service check",
+        failureStatus: HealthStatus.Unhealthy,
+        tags: new[] { "user-role" }
+    );
 
 var app = builder.Build();
 
-app.MapHealthChecks("/healthz");
+app.MapHealthChecks("/health/db", new HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("db"),
+    ResultStatusCodes =
+    {
+        [HealthStatus.Healthy] = StatusCodes.Status200OK,
+        [HealthStatus.Degraded] = StatusCodes.Status200OK,
+        [HealthStatus.Unhealthy] = StatusCodes.Status503ServiceUnavailable
+    },
+    ResponseWriter = WriteHealthCheckResponse.WriteJsonResponse
+});
+app.MapHealthChecks("/health/user", new HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("user"),
+    ResultStatusCodes =
+    {
+        [HealthStatus.Healthy] = StatusCodes.Status200OK,
+        [HealthStatus.Degraded] = StatusCodes.Status200OK,
+        [HealthStatus.Unhealthy] = StatusCodes.Status503ServiceUnavailable
+    },
+    ResponseWriter = WriteHealthCheckResponse.WriteJsonResponse
+});
+app.MapHealthChecks("/health/animal", new HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("animal"),
+    ResultStatusCodes =
+    {
+        [HealthStatus.Healthy] = StatusCodes.Status200OK,
+        [HealthStatus.Degraded] = StatusCodes.Status200OK,
+        [HealthStatus.Unhealthy] = StatusCodes.Status503ServiceUnavailable
+    },
+    ResponseWriter = WriteHealthCheckResponse.WriteJsonResponse
+});
+app.MapHealthChecks("/health/keeper", new HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("keeper"),
+    ResultStatusCodes =
+    {
+        [HealthStatus.Healthy] = StatusCodes.Status200OK,
+        [HealthStatus.Degraded] = StatusCodes.Status200OK,
+        [HealthStatus.Unhealthy] = StatusCodes.Status503ServiceUnavailable
+    },
+    ResponseWriter = WriteHealthCheckResponse.WriteJsonResponse
+});
+app.MapHealthChecks("/health/shift", new HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("shift"),
+    ResultStatusCodes =
+    {
+        [HealthStatus.Healthy] = StatusCodes.Status200OK,
+        [HealthStatus.Degraded] = StatusCodes.Status200OK,
+        [HealthStatus.Unhealthy] = StatusCodes.Status503ServiceUnavailable
+    },
+    ResponseWriter = WriteHealthCheckResponse.WriteJsonResponse
+});
+app.MapHealthChecks("/health/user-role", new HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("user-role"),
+    ResultStatusCodes =
+    {
+        [HealthStatus.Healthy] = StatusCodes.Status200OK,
+        [HealthStatus.Degraded] = StatusCodes.Status200OK,
+        [HealthStatus.Unhealthy] = StatusCodes.Status503ServiceUnavailable
+    },
+    ResponseWriter = WriteHealthCheckResponse.WriteJsonResponse
+});
+
 app.UseExceptionHandling();
 
 if (app.Environment.IsDevelopment())

@@ -1,9 +1,10 @@
 ﻿using LR6_WEB_NET.Models.Database;
 using LR6_WEB_NET.Models.Dto;
+using LR6_WEB_NET.Services.Service;
 
 namespace LR6_WEB_NET.Services.UserService;
 
-public interface IUserService
+public interface IUserService: IService
 {
     public Task<User?> FindOne(int id);
     public Task<User?> FindOneByEmail(string email);

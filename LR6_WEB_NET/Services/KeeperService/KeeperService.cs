@@ -66,4 +66,16 @@ public class KeeperService : IKeeperService
         await _dataContext.SaveChangesAsync();
         return keeperToDelete;
     }
+    
+    public async Task<string?> CheckServiceConnection()
+    {
+        try
+        {
+            var keeper = await _dataContext.Keepers.FirstOrDefaultAsync();
+            return null;
+        } catch (Exception e)
+        {
+            return e.Message;
+        }
+    }
 }

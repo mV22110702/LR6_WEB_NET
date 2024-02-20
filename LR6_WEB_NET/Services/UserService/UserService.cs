@@ -130,4 +130,16 @@ public class UserService : IUserService
         passwordSalt = hmac.Key;
         passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
     }
+    
+    public async Task<string?> CheckServiceConnection()
+    {
+        try
+        {
+            var user = await _dataContext.Users.FirstOrDefaultAsync();
+            return null;
+        } catch (Exception e)
+        {
+            return e.Message;
+        }
+    }
 }

@@ -17,4 +17,16 @@ public class UserRoleService: IUserRoleService
     {
         return _dataContext.UserRoles.FirstOrDefaultAsync(ur => ur.Name == name);
     }
+    
+    public async Task<string?> CheckServiceConnection()
+    {
+        try
+        {
+            var userRole = await _dataContext.UserRoles.FirstOrDefaultAsync();
+            return null;
+        } catch (Exception e)
+        {
+            return e.Message;
+        }
+    }
 }

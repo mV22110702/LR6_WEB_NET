@@ -5,6 +5,7 @@ using LR6_WEB_NET.Models.Database;
 using LR6_WEB_NET.Models.Dto;
 using LR6_WEB_NET.Services.AnimalService;
 using LR6_WEB_NET.Services.KeeperService;
+using Microsoft.EntityFrameworkCore;
 
 namespace LR6_WEB_NET.Services.ShiftService;
 
@@ -117,5 +118,17 @@ public class ShiftService : IShiftService
         _dataContext.Shifts.Remove(shiftToDelete);
         await _dataContext.SaveChangesAsync();
         return shiftToDelete;
+    }
+    
+    public async Task<string?> CheckServiceConnection()
+    {
+        try
+        {
+            var shift = await _dataContext.Shifts.FirstOrDefaultAsync();
+            return null;
+        } catch (Exception e)
+        {
+            return e.Message;
+        }
     }
 }

@@ -1,9 +1,10 @@
 ﻿using LR6_WEB_NET.Models.Database;
 using LR6_WEB_NET.Models.Dto;
+using LR6_WEB_NET.Services.Service;
 
 namespace LR6_WEB_NET.Services.KeeperService;
 
-public interface IKeeperService
+public interface IKeeperService: IService
 {
     public Task<Keeper?> FindOne(int id);
     public Task<bool> DoesExist(int id);
