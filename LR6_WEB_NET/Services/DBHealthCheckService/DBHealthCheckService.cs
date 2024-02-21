@@ -1,6 +1,7 @@
 ﻿using LR6_WEB_NET.Data.DatabaseContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Serilog;
 
 namespace LR6_WEB_NET.Services.DBSeedingHealthCheckService;
 
@@ -17,6 +18,7 @@ public class DBHealthCheckService : IHealthCheck
         HealthCheckContext context,
         CancellationToken cancellationToken = new CancellationToken())
     {
+        Log.Warning("Checking database health");
         if (!await _dataContext.Database.CanConnectAsync(cancellationToken))
         {
             return new HealthCheckResult(

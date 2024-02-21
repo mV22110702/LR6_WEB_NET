@@ -3,6 +3,7 @@ using LR6_WEB_NET.Services.UserService;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 
 namespace LR6_WEB_NET.Services.DBSeedingHealthCheckService;
 
@@ -19,6 +20,7 @@ public class UserHealthCheckService : IHealthCheck
         HealthCheckContext context,
         CancellationToken cancellationToken = new CancellationToken())
     {
+        Log.Warning("Checking user service health");
         var errorMessage = await _userService.CheckServiceConnection();
         if (!errorMessage.IsNullOrEmpty())
         {

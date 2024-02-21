@@ -3,6 +3,7 @@ using LR6_WEB_NET.Models.Dto;
 using LR6_WEB_NET.Services.AuthService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
 
 namespace LR6_WEB_NET.Controllers;
 
@@ -32,6 +33,7 @@ public class AuthController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<AuthResponseDto> Register([FromBody] UserRegisterDto userRegisterDto)
     {
+        Log.Debug("Register user {@UserRegisterDto}", userRegisterDto);
         var result = await _authService.Register(userRegisterDto);
         Response.StatusCode = StatusCodes.Status200OK;
         return new AuthResponseDto
@@ -52,6 +54,7 @@ public class AuthController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<AuthResponseDto> Login([FromBody] UserLoginDto userLoginDto)
     {
+        Log.Debug("Login user {@UserLoginDto}", userLoginDto);
         var result = await _authService.Login(userLoginDto);
         Response.StatusCode = StatusCodes.Status200OK;
         return new AuthResponseDto
