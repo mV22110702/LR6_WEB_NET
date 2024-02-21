@@ -7,7 +7,6 @@ using HealthChecks.UI.Client;
 using LR6_WEB_NET.ConfigurationOptions;
 using LR6_WEB_NET.Data.DatabaseContext;
 using LR6_WEB_NET.Extensions;
-using LR6_WEB_NET.Logging.Enrichers;
 using LR6_WEB_NET.Models.Database;
 using LR6_WEB_NET.Models.Enums;
 using LR6_WEB_NET.Services.AnimalService;
@@ -39,28 +38,37 @@ using Serilog.Sinks.SystemConsole.Themes;
 var builder = WebApplication.CreateBuilder(args);
 SmtpConfig? credentials = JsonSerializer.Deserialize<SmtpConfig>(File.ReadAllText("creds.json"));
 
+var url = builder.Configuration["Kestrel:Endpoints:Http:Url"];
+if (url.IsNullOrEmpty())
+{
+    throw new Exception("Kestrel:Endpoints:Http:Url is not set in appsettings.json");
+}
+var port = new Uri(url).Port;
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
     .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
-    .Enrich.WithClientIp()
-    .WriteTo.Console(theme:AnsiConsoleTheme.Code)
-    .WriteTo.File("log.txt", rollingInterval: RollingInterval.Day, outputTemplate:
+    .Enrich.WithProperty("AppPort",port)
+    .WriteTo.Console(theme: AnsiConsoleTheme.Code)
+    .WriteTo.File(
+        builder.Configuration["SerilogLogFile:Path"] ?? "log.txt", 
+        rollingInterval: RollingInterval.Day,
+        outputTemplate:
         "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}] [{Level}]: [{SourceContext}] [{EventId}] {Message}{NewLine}{Exception}"
-        )
-    .WriteTo.Seq("http://localhost:5341")
-    .WriteTo.Email(new EmailSinkOptions()
-        {
-            From = "fieldlavender70@gmail.com",
-            To = new List<string>(){"fieldlavender70@gmail.com"},
-            Host = "smtp.sendgrid.net",
-            Port=587,
-            Credentials= new NetworkCredential("apikey", 
-                credentials?.SendGridApiKey ?? string.Empty),
-            ConnectionSecurity = SecureSocketOptions.None,
-            Subject = new MessageTemplateTextFormatter(
-                "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}] [{Level}]: [{SourceContext}] [{EventId}] {Message}{NewLine}{Exception}"
-                ),
-        },restrictedToMinimumLevel:LogEventLevel.Warning)
+    )
+    .WriteTo.Seq(builder.Configuration["SeqServer:Url"] ?? "http://localhost:5341")
+    // .WriteTo.Email(new EmailSinkOptions()
+    // {
+    //     From = "fieldlavender70@gmail.com",
+    //     To = new List<string>() { "fieldlavender70@gmail.com" },
+    //     Host = "smtp.sendgrid.net",
+    //     Port = 587,
+    //     Credentials = new NetworkCredential("apikey",
+    //         credentials?.SendGridApiKey ?? string.Empty),
+    //     ConnectionSecurity = SecureSocketOptions.None,
+    //     Subject = new MessageTemplateTextFormatter(
+    //         "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}] [{Level}]: [{SourceContext}] [{EventId}] {Message}{NewLine}{Exception}"
+    //     ),
+    // }, restrictedToMinimumLevel: LogEventLevel.Warning)
     .CreateLogger();
 
 builder.Services.AddApiVersioning(options =>
@@ -197,8 +205,19 @@ builder.Services.AddSingleton<IServerAddressesFeature, ServerAddressesFeature>()
 
 var app = builder.Build();
 
-app.UseMiddleware<AppPortEnricherMiddleware>();
-app.UseSerilogRequestLogging();
+app.UseSerilogRequestLogging(options =>
+{
+    // Customize the message template
+    options.MessageTemplate = "{RemoteIpAddress} {RequestHost} {RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0.0000} ms";
+
+
+    // Attach additional properties to the request completion event
+    options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
+    {
+        diagnosticContext.Set("RequestHost", httpContext.Request.Host.Value);
+        diagnosticContext.Set("RemoteIpAddress", httpContext.Connection.RemoteIpAddress);
+    };
+});
 app.MapHealthChecksUI();
 app.MapHealthChecks("/health-ui", new HealthCheckOptions
 {
@@ -299,5 +318,6 @@ app.MapControllers();
 
 
 app.Run();
+Log.Information("Server is listening at port {AppPort}");
 IHostApplicationLifetime hostApplicationLifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
 hostApplicationLifetime.ApplicationStopping.Register(Log.CloseAndFlush);

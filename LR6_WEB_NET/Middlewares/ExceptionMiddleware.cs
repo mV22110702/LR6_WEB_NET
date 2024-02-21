@@ -1,5 +1,6 @@
 ﻿using System.Web.Http;
 using LR6_WEB_NET.Models.Dto;
+using Serilog;
 
 namespace LR6_WEB_NET.Middlewares;
 
@@ -32,6 +33,7 @@ public class ExceptionHandlingMiddleware
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)exception.Response.StatusCode;
             var responseText = reader.ReadToEnd();
+            Log.Error("Exception: {ResponseText}", responseText);
             var responseDto = new ResponseDto<int>
             {
                 Description = responseText,

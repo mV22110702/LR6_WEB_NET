@@ -1,6 +1,7 @@
 ﻿using LR6_WEB_NET.Models.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Serilog;
 
 namespace LR6_WEB_NET.Models.EntityTypeConfigurations;
 
@@ -20,5 +21,6 @@ public class KeeperConfiguration : IEntityTypeConfiguration<Keeper>
             new Keeper { Id = 9, Name = "Jane Rich", Age = 35 },
             new Keeper { Id = 10, Name = "Jack Clinton", Age = 36 }
         );
+        Log.Information("Keepers have been seeded with {Count} entities", 10);
     }
 }

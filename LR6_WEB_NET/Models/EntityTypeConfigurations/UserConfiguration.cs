@@ -2,6 +2,7 @@
 using LR6_WEB_NET.Services.UserService;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Serilog;
 
 namespace LR6_WEB_NET.Models.EntityTypeConfigurations;
 
@@ -27,5 +28,6 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             UserService.SetUserPasswordHash(tempUser, $"password{i}");
             builder.HasData(tempUser);
         }
+        Log.Information("Users have been seeded with {Count} entities", 10);
     }
 }

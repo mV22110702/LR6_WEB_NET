@@ -1,6 +1,7 @@
 ﻿using LR6_WEB_NET.Models.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Serilog;
 
 namespace LR6_WEB_NET.Models.EntityTypeConfigurations;
 
@@ -80,5 +81,6 @@ public class AnimalConfiguration : IEntityTypeConfiguration<Animal>
                 Age = 1
             }
         );
+        Log.Information("Animals have been seeded with {Count} entities", 10);
     }
 }
