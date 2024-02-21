@@ -1,8 +1,13 @@
+using System.Net;
+using System.Net.Mail;
 using System.Text;
+using System.Text.Json;
 using Asp.Versioning;
 using HealthChecks.UI.Client;
+using LR6_WEB_NET.ConfigurationOptions;
 using LR6_WEB_NET.Data.DatabaseContext;
 using LR6_WEB_NET.Extensions;
+using LR6_WEB_NET.Logging.Enrichers;
 using LR6_WEB_NET.Models.Database;
 using LR6_WEB_NET.Models.Enums;
 using LR6_WEB_NET.Services.AnimalService;
@@ -13,9 +18,11 @@ using LR6_WEB_NET.Services.KeeperService;
 using LR6_WEB_NET.Services.ShiftService;
 using LR6_WEB_NET.Services.UserRoleService;
 using LR6_WEB_NET.Services.UserService;
+using MailKit.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
@@ -23,8 +30,39 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
+using Serilog.Events;
+using Serilog.Formatting.Display;
+using Serilog.Sinks.Email;
+using Serilog.Sinks.SystemConsole.Themes;
 
 var builder = WebApplication.CreateBuilder(args);
+SmtpConfig? credentials = JsonSerializer.Deserialize<SmtpConfig>(File.ReadAllText("creds.json"));
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+    .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+    .Enrich.WithClientIp()
+    .WriteTo.Console(theme:AnsiConsoleTheme.Code)
+    .WriteTo.File("log.txt", rollingInterval: RollingInterval.Day, outputTemplate:
+        "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}] [{Level}]: [{SourceContext}] [{EventId}] {Message}{NewLine}{Exception}"
+        )
+    .WriteTo.Seq("http://localhost:5341")
+    .WriteTo.Email(new EmailSinkOptions()
+        {
+            From = "fieldlavender70@gmail.com",
+            To = new List<string>(){"fieldlavender70@gmail.com"},
+            Host = "smtp.sendgrid.net",
+            Port=587,
+            Credentials= new NetworkCredential("apikey", 
+                credentials?.SendGridApiKey ?? string.Empty),
+            ConnectionSecurity = SecureSocketOptions.None,
+            Subject = new MessageTemplateTextFormatter(
+                "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}] [{Level}]: [{SourceContext}] [{EventId}] {Message}{NewLine}{Exception}"
+                ),
+        },restrictedToMinimumLevel:LogEventLevel.Warning)
+    .CreateLogger();
+
 builder.Services.AddApiVersioning(options =>
 {
     options.ReportApiVersions = true;
@@ -138,7 +176,7 @@ builder.Services.AddHealthChecks()
         "Animal service check",
         failureStatus: HealthStatus.Unhealthy,
         tags: new[] { "animal" }
-    )
+    ).AddDbContextCheck<DataContext>()
     .AddCheck<KeeperHealthCheckService>(
         "Keeper service check",
         failureStatus: HealthStatus.Unhealthy,
@@ -154,9 +192,13 @@ builder.Services.AddHealthChecks()
         tags: new[] { "user-role" }
     );
 builder.Services.AddHealthChecksUI().AddInMemoryStorage();
+builder.Host.UseSerilog();
+builder.Services.AddSingleton<IServerAddressesFeature, ServerAddressesFeature>();
 
 var app = builder.Build();
 
+app.UseMiddleware<AppPortEnricherMiddleware>();
+app.UseSerilogRequestLogging();
 app.MapHealthChecksUI();
 app.MapHealthChecks("/health-ui", new HealthCheckOptions
 {
@@ -257,3 +299,5 @@ app.MapControllers();
 
 
 app.Run();
+IHostApplicationLifetime hostApplicationLifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
+hostApplicationLifetime.ApplicationStopping.Register(Log.CloseAndFlush);

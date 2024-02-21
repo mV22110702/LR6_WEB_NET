@@ -8,23 +8,24 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Asp.Versioning.Abstractions" Version="7.0.0"/>
-        <PackageReference Include="Asp.Versioning.Http" Version="7.1.0"/>
-        <PackageReference Include="Asp.Versioning.Http.Client" Version="7.0.1"/>
-        <PackageReference Include="Asp.Versioning.Mvc" Version="7.1.1"/>
-        <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="7.1.0"/>
-        <PackageReference Include="Asp.Versioning.WebApi" Version="7.1.0"/>
-        <PackageReference Include="Asp.Versioning.WebApi.ApiExplorer" Version="7.1.0"/>
+        <PackageReference Include="Asp.Versioning.Abstractions" Version="7.0.0" />
+        <PackageReference Include="Asp.Versioning.Http" Version="7.1.0" />
+        <PackageReference Include="Asp.Versioning.Http.Client" Version="7.0.1" />
+        <PackageReference Include="Asp.Versioning.Mvc" Version="7.1.1" />
+        <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="7.1.0" />
+        <PackageReference Include="Asp.Versioning.WebApi" Version="7.1.0" />
+        <PackageReference Include="Asp.Versioning.WebApi.ApiExplorer" Version="7.1.0" />
+        <PackageReference Include="AspNetCore.HealthChecks.MySql" Version="7.0.0" />
         <PackageReference Include="AspNetCore.HealthChecks.UI" Version="7.0.2" />
         <PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="7.1.0" />
         <PackageReference Include="AspNetCore.HealthChecks.UI.InMemory.Storage" Version="7.0.0" />
-        <PackageReference Include="ClosedXML" Version="0.102.2"/>
+        <PackageReference Include="ClosedXML" Version="0.102.2" />
         <PackageReference Include="EntityFrameworkCore.Exceptions.MySQL.Pomelo" Version="8.0.0" />
-        <PackageReference Include="HotChocolate.Validation" Version="14.0.0-p.31"/>
-        <PackageReference Include="Microsoft.AspNet.WebApi" Version="5.3.0"/>
-        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.15"/>
+        <PackageReference Include="HotChocolate.Validation" Version="14.0.0-p.31" />
+        <PackageReference Include="Microsoft.AspNet.WebApi" Version="5.3.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.15" />
         <PackageReference Include="Microsoft.AspNetCore.Diagnostics.HealthChecks" Version="2.2.0" />
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.1"/>
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.1" />
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.16" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.16">
           <PrivateAssets>all</PrivateAssets>
@@ -40,13 +41,26 @@
         <PackageReference Include="OfficeOpenXml.Core.ExcelPackage" Version="1.0.0" />
         <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="7.0.0" />
         <PackageReference Include="Pomelo.EntityFrameworkCore.MySql.Design" Version="1.1.2" />
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0"/>
-        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.3.1"/>
+        <PackageReference Include="Serilog" Version="3.1.1" />
+        <PackageReference Include="Serilog.AspNetCore" Version="7.0.0" />
+        <PackageReference Include="Serilog.Enrichers.ClientInfo" Version="2.0.3" />
+        <PackageReference Include="Serilog.Sinks.ColoredConsole" Version="3.0.1" />
+        <PackageReference Include="Serilog.Sinks.Console" Version="5.0.0" />
+        <PackageReference Include="Serilog.Sinks.Email" Version="3.0.0-dev-00166" />
+        <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+        <PackageReference Include="Serilog.Sinks.Seq" Version="7.0.0-dev-00276" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.3.1" />
+        <PackageReference Include="System.Net.Mail" Version="1.0.0-rtm-00002" />
     </ItemGroup>
 
     <ItemGroup>
         <Folder Include="Data\Migrations\" />
         <Folder Include="Models\API\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Remove="creds.json" />
     </ItemGroup>
 
 </Project>
