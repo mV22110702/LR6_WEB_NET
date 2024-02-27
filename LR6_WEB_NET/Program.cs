@@ -31,6 +31,9 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Serilog.Events;
+using Serilog.Exceptions;
+using Serilog.Exceptions.Core;
+using Serilog.Exceptions.EntityFrameworkCore.Destructurers;
 using Serilog.Formatting.Display;
 using Serilog.Sinks.Email;
 using Serilog.Sinks.SystemConsole.Themes;
@@ -52,25 +55,28 @@ try
         .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
         .MinimumLevel.Debug()
         .Enrich.WithProperty("AppPort", port)
+        .Enrich.WithExceptionDetails(new DestructuringOptionsBuilder()
+            .WithDefaultDestructurers()
+            .WithDestructurers(new[] { new DbUpdateExceptionDestructurer() }))
         .WriteTo.Console(theme: AnsiConsoleTheme.Code)
         .WriteTo.File(
             builder.Configuration["SerilogLogFile:Path"] ?? "log.txt",
             rollingInterval: RollingInterval.Day,
             outputTemplate:
-            "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}] [{Level}]: [{SourceContext}] [{EventId}] {Message}{NewLine}{Exception}"
+            "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}] [{Level}]: [{SourceContext}] [{EventId}] {Message}{NewLine}{Exception} {Properties:j}"
         )
-        .WriteTo.Seq(builder.Configuration["SeqServer:Url"] ?? "http://localhost:5341",LogEventLevel.Debug)
+        .WriteTo.Seq(builder.Configuration["SeqServer:Url"] ?? "http://localhost:5341", LogEventLevel.Debug)
         .WriteTo.Email(new EmailSinkOptions()
         {
-            From = "fieldlavender70@gmail.com",
-            To = new List<string>() { "fieldlavender70@gmail.com" },
-            Host = "smtp.sendgrid.net",
-            Port = 587,
+            From = credentials.From,
+            To = new List<string>() { credentials.To },
+            Host = credentials.Host,
+            Port = credentials.Port,
             Credentials = new NetworkCredential("apikey",
                 credentials?.SendGridApiKey ?? string.Empty),
             ConnectionSecurity = SecureSocketOptions.None,
             Subject = new MessageTemplateTextFormatter(
-                "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}] [{Level}]: [{SourceContext}] [{EventId}] {Message}{NewLine}{Exception}"
+                "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}] [{Level}]: [{SourceContext}] [{EventId}] {Message}{NewLine}{Exception} {Properties:j}"
             ),
         }, restrictedToMinimumLevel: LogEventLevel.Warning)
         .CreateLogger();
@@ -321,8 +327,6 @@ try
     IHostApplicationLifetime hostApplicationLifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
     hostApplicationLifetime.ApplicationStopping.Register(Log.CloseAndFlush);
     app.Run();
-    
-    
 }
 catch (Exception e)
 {

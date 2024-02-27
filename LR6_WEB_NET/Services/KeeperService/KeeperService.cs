@@ -5,6 +5,7 @@ using LR6_WEB_NET.Models.Database;
 using LR6_WEB_NET.Models.Dto;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 
 namespace LR6_WEB_NET.Services.KeeperService;
 
@@ -75,6 +76,7 @@ public class KeeperService : IKeeperService
             return null;
         } catch (Exception e)
         {
+Log.Error(e,"Check keeper service connection failed");
             return e.Message;
         }
     }

@@ -6,6 +6,7 @@ using LR6_WEB_NET.Models.Dto;
 using LR6_WEB_NET.Services.AnimalService;
 using LR6_WEB_NET.Services.KeeperService;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 
 namespace LR6_WEB_NET.Services.ShiftService;
 
@@ -128,6 +129,7 @@ public class ShiftService : IShiftService
             return null;
         } catch (Exception e)
         {
+Log.Error(e,"Check shift service connection failed");
             return e.Message;
         }
     }

@@ -19,9 +19,10 @@ public class ExceptionHandlingMiddleware
         {
             await _next(context);
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            await HandleExceptionAsync(context, ex);
+Log.Error(e, "Exception middleware caught error");
+            await HandleExceptionAsync(context, e);
         }
     }
 

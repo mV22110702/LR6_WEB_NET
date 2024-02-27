@@ -7,6 +7,7 @@ using LR6_WEB_NET.Models.Database;
 using LR6_WEB_NET.Models.Dto;
 using LR6_WEB_NET.Services.UserRoleService;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 
 namespace LR6_WEB_NET.Services.UserService;
 
@@ -130,15 +131,17 @@ public class UserService : IUserService
         passwordSalt = hmac.Key;
         passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
     }
-    
+
     public async Task<string?> CheckServiceConnection()
     {
         try
         {
             var user = await _dataContext.Users.FirstOrDefaultAsync();
             return null;
-        } catch (Exception e)
+        }
+        catch (Exception e)
         {
+            Log.Error(e,"Check user service connection failed");
             return e.Message;
         }
     }

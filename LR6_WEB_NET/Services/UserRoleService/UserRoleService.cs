@@ -1,6 +1,7 @@
 ﻿using LR6_WEB_NET.Data.DatabaseContext;
 using LR6_WEB_NET.Models.Database;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 
 namespace LR6_WEB_NET.Services.UserRoleService;
 
@@ -26,6 +27,7 @@ public class UserRoleService: IUserRoleService
             return null;
         } catch (Exception e)
         {
+Log.Error(e,"Check user role service connection failed");
             return e.Message;
         }
     }

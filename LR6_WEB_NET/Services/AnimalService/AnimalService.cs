@@ -4,6 +4,7 @@ using LR6_WEB_NET.Data.DatabaseContext;
 using LR6_WEB_NET.Models.Database;
 using LR6_WEB_NET.Models.Dto;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 
 namespace LR6_WEB_NET.Services.AnimalService;
 
@@ -77,6 +78,7 @@ public class AnimalService : IAnimalService
             return null;
         } catch (Exception e)
         {
+Log.Error(e, "Check animal service connection failed");
             return e.Message;
         }
     }
