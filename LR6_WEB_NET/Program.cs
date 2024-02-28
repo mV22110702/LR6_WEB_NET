@@ -38,18 +38,13 @@ using Serilog.Formatting.Display;
 using Serilog.Sinks.Email;
 using Serilog.Sinks.SystemConsole.Themes;
 
+    var builder = WebApplication.CreateBuilder(args);
 try
 {
-    var builder = WebApplication.CreateBuilder(args);
     SmtpConfig? credentials = JsonSerializer.Deserialize<SmtpConfig>(File.ReadAllText("creds.json"));
-
-    var url = builder.Configuration["Kestrel:Endpoints:Http:Url"];
-    if (url.IsNullOrEmpty())
-    {
-        throw new Exception("Kestrel:Endpoints:Http:Url is not set in appsettings.json");
-    }
-
-    var port = new Uri(url).Port;
+    var url = builder.Configuration["Urls"]??"http://localhost:5000";
+    
+    Int32.TryParse(url.Split(':')[1], out var port);
     Log.Logger = new LoggerConfiguration()
         .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
         .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
@@ -78,7 +73,7 @@ try
             Subject = new MessageTemplateTextFormatter(
                 "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}] [{Level}]: [{SourceContext}] [{EventId}] {Message}{NewLine}{Exception} {Properties:j}"
             ),
-        }, restrictedToMinimumLevel: LogEventLevel.Warning)
+        }, restrictedToMinimumLevel: LogEventLevel.Error)
         .CreateLogger();
 
     builder.Services.AddApiVersioning(options =>
@@ -331,4 +326,5 @@ try
 catch (Exception e)
 {
     Log.Fatal("Server failed to start: {Message}", e.Message);
+    throw e;
 }
